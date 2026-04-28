@@ -1,0 +1,18 @@
+.
+├── index.html
+├── package-lock.json
+├── package.json
+├── public
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── manifest.webmanifest
+│   └── sw.js
+├── src
+│   ├── AdminMetadataSearch.jsx
+│   ├── api.js
+│   ├── main.backup.jsx
+│   ├── main.jsx
+│   └── style.css
+└── structura-cineverse.txt
+
+3 directories, 13 files

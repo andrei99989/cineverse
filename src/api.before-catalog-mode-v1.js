@@ -1,0 +1,57 @@
+export const API_URL =
+  localStorage.getItem("cineverse_api_url") ||
+  "https://jolly-sea-36fd.iri20rob94.workers.dev";
+
+export async function apiGet(path) {
+  const response = await fetch(`${API_URL}${path}`);
+
+  if (!response.ok) {
+    throw new Error(`API GET failed: ${path}`);
+  }
+
+  return response.json();
+}
+
+export async function apiPost(path, data) {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    throw new Error(`API POST failed: ${path}`);
+  }
+
+  return response.json();
+}
+
+export async function apiPut(path, data) {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    throw new Error(`API PUT failed: ${path}`);
+  }
+
+  return response.json();
+}
+
+export async function apiDelete(path) {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "DELETE"
+  });
+
+  if (!response.ok) {
+    throw new Error(`API DELETE failed: ${path}`);
+  }
+
+  return response.json();
+}

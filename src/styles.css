@@ -1,0 +1,164 @@
+
+.adminStatusCard {
+  margin: 14px 0;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+}
+
+.adminStatusCard strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.adminStatusCard p {
+  margin: 0 0 6px;
+  color: rgba(255,255,255,.82);
+}
+
+.adminStatusCard span {
+  font-size: 12px;
+  color: rgba(255,255,255,.55);
+}
+
+.adminStatusCard.success {
+  border-color: rgba(34,197,94,.5);
+  background: rgba(34,197,94,.12);
+}
+
+.adminStatusCard.warning {
+  border-color: rgba(245,158,11,.5);
+  background: rgba(245,158,11,.12);
+}
+
+.adminStatusCard.danger {
+  border-color: rgba(239,68,68,.5);
+  background: rgba(239,68,68,.12);
+}
+
+.quickFilterBar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 0 4px;
+  margin-bottom: 8px;
+}
+
+.quickFilterBar button {
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border-radius: 999px;
+  padding: 9px 13px;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.quickFilterBar button.active {
+  background: #e50914;
+  border-color: #e50914;
+}
+
+.sortControl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 4px;
+}
+
+.sortControl label {
+  font-weight: 800;
+  color: rgba(255,255,255,.78);
+}
+
+.sortControl select {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.downloadHero {
+  margin: 18px 0;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: linear-gradient(135deg, rgba(229,9,20,.22), rgba(255,255,255,.05));
+}
+
+.downloadGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.downloadCard {
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.downloadCardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.downloadCardHeader h3 {
+  margin: 0 0 5px;
+}
+
+.downloadCardHeader p {
+  margin: 0;
+  color: rgba(255,255,255,.62);
+}
+
+.statusOk,
+.statusPending {
+  border-radius: 999px;
+  padding: 6px 9px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.statusOk {
+  background: rgba(34,197,94,.16);
+  color: #86efac;
+  border: 1px solid rgba(34,197,94,.35);
+}
+
+.statusPending {
+  background: rgba(245,158,11,.16);
+  color: #fcd34d;
+  border: 1px solid rgba(245,158,11,.35);
+}
+
+.packageMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.packageMeta span {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.1);
+  padding: 7px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.downloadCard pre {
+  background: rgba(0,0,0,.5);
+  border-radius: 12px;
+  padding: 12px;
+  overflow-x: auto;
+  font-size: 12px;
+}
