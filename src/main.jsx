@@ -1834,7 +1834,7 @@ function App() {
 
       {page === "settings" && <SettingsCenter />}
 
-      {page === "admin" && <AdminPage movies={movies} uploads={uploads} addMovie={addMovie} deleteMovie={deleteMovie} syncUploadsToAlgolia={syncUploadsToAlgolia} lastAlgoliaSync={lastAlgoliaSync} adminAlgoliaMessage={adminAlgoliaMessage} setAdminAlgoliaMessage={setAdminAlgoliaMessage} onEdit={setEditingUpload} />}
+      {page === "admin" && <AdminPage movies={movies} uploads={uploads} addMovie={addMovie} deleteMovie={deleteMovie} syncUploadsToAlgolia={syncUploadsToAlgolia} lastAlgoliaSync={lastAlgoliaSync} adminAlgoliaMessage={adminAlgoliaMessage} setAdminAlgoliaMessage={setAdminAlgoliaMessage} onEdit={setEditingUpload} setPage={setPage} />}
     </div>
   );
 }
@@ -3085,6 +3085,9 @@ const qualityPanelMissingPoster = catalogStats?.quality ? Number(catalogStats.qu
 const qualityPanelMissingGenre = catalogStats?.quality ? Number(catalogStats.quality.missingGenre || 0) : libraryQuality.withoutGenre;
 const qualityPanelMissingYear = catalogStats?.quality ? Number(catalogStats.quality.missingYear || 0) : libraryQuality.withoutYear;
 const qualityPanelMissingTags = catalogStats?.quality ? Number(catalogStats.quality.missingTags || 0) : libraryQuality.withoutTags;
+const qualityPanelMissingCountry = catalogStats?.quality ? Number(catalogStats.quality.missingCountry || 0) : 0;
+const qualityPanelMissingLanguage = catalogStats?.quality ? Number(catalogStats.quality.missingLanguage || 0) : 0;
+const qualityPanelMissingQuality = catalogStats?.quality ? Number(catalogStats.quality.missingQuality || 0) : 0;
 const qualityPanelWithPoster = Math.max(0, qualityPanelTotal - qualityPanelMissingPoster);
 const qualityPanelWithGenre = Math.max(0, qualityPanelTotal - qualityPanelMissingGenre);
 const qualityPanelWithYear = Math.max(0, qualityPanelTotal - qualityPanelMissingYear);
@@ -4939,6 +4942,21 @@ const smartEmptyActions = [
                       Fără tags: {qualityPanelMissingTags}
                     </button>
                   )}
+                  {qualityPanelMissingCountry > 0 && (
+                    <button className="filterChip" onClick={() => { setLibraryQualityFilter("missingCountry"); setPage(1); }}>
+                      Fără țară: {qualityPanelMissingCountry}
+                    </button>
+                  )}
+                  {qualityPanelMissingLanguage > 0 && (
+                    <button className="filterChip" onClick={() => { setLibraryQualityFilter("missingLanguage"); setPage(1); }}>
+                      Fără limbă: {qualityPanelMissingLanguage}
+                    </button>
+                  )}
+                  {qualityPanelMissingQuality > 0 && (
+                    <button className="filterChip" onClick={() => { setLibraryQualityFilter("missingQuality"); setPage(1); }}>
+                      Fără calitate: {qualityPanelMissingQuality}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -5857,7 +5875,7 @@ function DownloadPage() {
 }
 
 
-function AdminMetadataAuditPanel({ uploads = [], onEdit }) {
+function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
   const [serverStats, setServerStats] = useState(null);
   const [serverStatsError, setServerStatsError] = useState("");
 
@@ -5960,6 +5978,16 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit }) {
 
   const worstItems = auditItems.filter((item) => item.missing.length > 0).slice(0, 12);
 
+  const goToQualityFilter = (quality) => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("page", "library");
+      url.searchParams.set("aiQuality", quality);
+      window.history.replaceState({}, "", url.toString());
+    } catch {}
+    onGoToLibrary?.();
+  };
+
   return (
     <div className="adminMetadataAuditPanel">
       <div className="sectionHeader">
@@ -5985,6 +6013,13 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit }) {
         <div><strong>{displayTotals.missingQuality}</strong><span>Fără calitate</span></div>
       </div>
 
+      <div className="quickActions">
+        <button type="button" onClick={() => goToQualityFilter("missingPoster")}>Vezi fără poster</button>
+        <button type="button" onClick={() => goToQualityFilter("missingGenre")}>Vezi fără gen</button>
+        <button type="button" onClick={() => goToQualityFilter("missingYear")}>Vezi fără an</button>
+        <button type="button" onClick={() => goToQualityFilter("missingTags")}>Vezi fără tags</button>
+      </div>
+
       {worstItems.length === 0 ? (
         <p className="empty">Toate upload-urile au metadata completă.</p>
       ) : (
@@ -6008,7 +6043,7 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit }) {
 }
 
 
-function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage, onEdit }) {
+function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage, onEdit, setPage }) {
   const [adminCatalogStats, setAdminCatalogStats] = useState(null);
   const [adminCatalogStatsError, setAdminCatalogStatsError] = useState("");
 
@@ -6105,7 +6140,7 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
     <main>
       <section className="section admin">
         <AdminMetadataSearch />
-        <AdminMetadataAuditPanel uploads={uploads} onEdit={onEdit} />
+        <AdminMetadataAuditPanel uploads={uploads} onEdit={onEdit} onGoToLibrary={() => setPage?.("library")} />
 
         <div className="details">
           <div>
