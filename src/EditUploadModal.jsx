@@ -213,6 +213,24 @@ export default function EditUploadModal({ upload, onClose, onSave }) {
               <h3>Metadata rapide</h3>
               <p>Completează câmpurile principale fără să editezi manual JSON-ul.</p>
 
+              <div className="quickActions">
+                <button type="button" onClick={() => { setQuickCountry("Statele Unite"); setQuickLanguage("Engleză"); setQuickVideoQuality("HD"); }}>
+                  US + Engleză + HD
+                </button>
+                <button type="button" onClick={() => { setQuickCountry("România"); setQuickLanguage("Română"); setQuickVideoQuality("HD"); }}>
+                  RO + Română + HD
+                </button>
+                <button type="button" onClick={() => { setQuickCountry("Japonia"); setQuickLanguage("Japoneză"); setQuickVideoQuality("HD"); }}>
+                  JP + Japoneză + HD
+                </button>
+                <button type="button" onClick={() => { setQuickCountry("India"); setQuickLanguage("Hindi"); setQuickVideoQuality("HD"); }}>
+                  IN + Hindi + HD
+                </button>
+                <button type="button" onClick={() => { setQuickCountry("Coreea de Sud"); setQuickLanguage("Coreeană"); setQuickVideoQuality("HD"); }}>
+                  KR + Coreeană + HD
+                </button>
+              </div>
+
               <div className="formGrid">
                 <label>
                   An
