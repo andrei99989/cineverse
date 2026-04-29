@@ -1834,7 +1834,7 @@ function App() {
 
       {page === "settings" && <SettingsCenter />}
 
-      {page === "admin" && <AdminPage movies={movies} uploads={uploads} addMovie={addMovie} deleteMovie={deleteMovie} syncUploadsToAlgolia={syncUploadsToAlgolia} lastAlgoliaSync={lastAlgoliaSync} adminAlgoliaMessage={adminAlgoliaMessage} setAdminAlgoliaMessage={setAdminAlgoliaMessage} />}
+      {page === "admin" && <AdminPage movies={movies} uploads={uploads} addMovie={addMovie} deleteMovie={deleteMovie} syncUploadsToAlgolia={syncUploadsToAlgolia} lastAlgoliaSync={lastAlgoliaSync} adminAlgoliaMessage={adminAlgoliaMessage} setAdminAlgoliaMessage={setAdminAlgoliaMessage} onEdit={setEditingUpload} />}
     </div>
   );
 }
@@ -5856,7 +5856,194 @@ function DownloadPage() {
   );
 }
 
-function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage }) {
+
+function AdminMetadataAuditPanel({ uploads = [], onEdit }) {
+  const [serverStats, setServerStats] = useState(null);
+  const [serverStatsError, setServerStatsError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadServerStats() {
+      try {
+        setServerStatsError("");
+        const response = await fetch(`${API_URL}/catalog/stats`);
+        const data = await response.json();
+
+        if (!alive) return;
+
+        if (data?.ok) {
+          setServerStats(data);
+        } else {
+          setServerStatsError(data?.error || "Nu am putut încărca /catalog/stats");
+        }
+      } catch (error) {
+        if (alive) setServerStatsError(String(error?.message || error));
+      }
+    }
+
+    loadServerStats();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const auditItems = useMemo(() => {
+    return uploads.map((upload) => {
+      const metadata = upload.metadata || {};
+      const missing = [];
+
+      if (!upload.posterUrl) missing.push("poster");
+      if (!metadata.genre || metadata.genre === "General") missing.push("gen");
+      if (!metadata.year) missing.push("an");
+      if (!metadata.country || metadata.country === "All") missing.push("țară");
+      if (!metadata.language || metadata.language === "All") missing.push("limbă");
+      if (!metadata.videoQuality && !metadata.quality) missing.push("calitate");
+
+      return {
+        upload,
+        metadata,
+        missing,
+        score: Math.max(0, 100 - missing.length * 15)
+      };
+    }).sort((a, b) => a.score - b.score || b.missing.length - a.missing.length);
+  }, [uploads]);
+
+  const totals = useMemo(() => {
+    const total = auditItems.length;
+    const withIssues = auditItems.filter((item) => item.missing.length > 0).length;
+
+    return {
+      total,
+      withIssues,
+      complete: total - withIssues,
+      missingPoster: auditItems.filter((item) => item.missing.includes("poster")).length,
+      missingGenre: auditItems.filter((item) => item.missing.includes("gen")).length,
+      missingYear: auditItems.filter((item) => item.missing.includes("an")).length,
+      missingCountry: auditItems.filter((item) => item.missing.includes("țară")).length,
+      missingLanguage: auditItems.filter((item) => item.missing.includes("limbă")).length,
+      missingQuality: auditItems.filter((item) => item.missing.includes("calitate")).length
+    };
+  }, [auditItems]);
+
+  const serverQuality = serverStats?.quality || null;
+  const serverTotal = Number(serverStats?.total || 0);
+
+  const displayTotals = serverStats?.ok && serverTotal
+    ? {
+        total: serverTotal,
+        withIssues: Math.max(
+          Number(serverQuality?.missingPoster || 0),
+          Number(serverQuality?.missingGenre || 0),
+          Number(serverQuality?.missingYear || 0),
+          Number(serverQuality?.missingTags || 0)
+        ),
+        complete: Math.max(
+          0,
+          serverTotal -
+            Math.max(
+              Number(serverQuality?.missingPoster || 0),
+              Number(serverQuality?.missingGenre || 0),
+              Number(serverQuality?.missingYear || 0),
+              Number(serverQuality?.missingTags || 0)
+            )
+        ),
+        missingPoster: Number(serverQuality?.missingPoster || 0),
+        missingGenre: Number(serverQuality?.missingGenre || 0),
+        missingYear: Number(serverQuality?.missingYear || 0),
+        missingCountry: totals.missingCountry,
+        missingLanguage: totals.missingLanguage,
+        missingQuality: totals.missingQuality
+      }
+    : totals;
+
+  const worstItems = auditItems.filter((item) => item.missing.length > 0).slice(0, 12);
+
+  return (
+    <div className="adminMetadataAuditPanel">
+      <div className="sectionHeader">
+        <div>
+          <h3>Admin Metadata Audit</h3>
+          <p>Verifică rapid upload-urile care au metadata incompletă.</p>
+          <p className="mutedText">
+            {serverStats?.ok ? "Stats server-side din Cloudflare D1" : "Stats locale fallback"}
+            {serverStatsError ? ` · ${serverStatsError}` : ""}
+          </p>
+        </div>
+        <span className="pill">{displayTotals.complete}/{displayTotals.total} complete</span>
+      </div>
+
+      <div className="stats">
+        <div><strong>{displayTotals.total}</strong><span>Total</span></div>
+        <div><strong>{displayTotals.withIssues}</strong><span>Cu lipsuri</span></div>
+        <div><strong>{displayTotals.missingPoster}</strong><span>Fără poster</span></div>
+        <div><strong>{displayTotals.missingGenre}</strong><span>Fără gen</span></div>
+        <div><strong>{displayTotals.missingYear}</strong><span>Fără an</span></div>
+        <div><strong>{displayTotals.missingCountry}</strong><span>Fără țară</span></div>
+        <div><strong>{displayTotals.missingLanguage}</strong><span>Fără limbă</span></div>
+        <div><strong>{displayTotals.missingQuality}</strong><span>Fără calitate</span></div>
+      </div>
+
+      {worstItems.length === 0 ? (
+        <p className="empty">Toate upload-urile au metadata completă.</p>
+      ) : (
+        <div className="auditList">
+          {worstItems.map(({ upload, missing, score }) => (
+            <div className="auditItem" key={upload.id}>
+              <div>
+                <strong>{upload.title || "Fără titlu"}</strong>
+                <p>{upload.sourceType || "Sursă necunoscută"} · scor metadata {score}%</p>
+                <div className="metadataBadgeRow">
+                  {missing.map((item) => <span key={item}>Lipsește: {item}</span>)}
+                </div>
+              </div>
+              <button type="button" onClick={() => onEdit?.(upload)}>Edit metadata</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage, onEdit }) {
+  const [adminCatalogStats, setAdminCatalogStats] = useState(null);
+  const [adminCatalogStatsError, setAdminCatalogStatsError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadAdminCatalogStats() {
+      try {
+        setAdminCatalogStatsError("");
+        const response = await fetch(`${API_URL}/catalog/stats`);
+        const data = await response.json();
+
+        if (!alive) return;
+
+        if (data?.ok) {
+          setAdminCatalogStats(data);
+        } else {
+          setAdminCatalogStatsError(data?.error || "Nu am putut încărca /catalog/stats");
+        }
+      } catch (error) {
+        if (alive) setAdminCatalogStatsError(String(error?.message || error));
+      }
+    }
+
+    loadAdminCatalogStats();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const adminD1Total = Number(adminCatalogStats?.total || 0);
+  const adminUploadTotal = adminD1Total || uploads.length;
+  const adminStatsMode = adminD1Total ? "D1 server-side" : "local fallback";
+
   const bulkQualityAuditItems = (uploads || []).filter((item) => {
     const title = String(item?.title || "").toLowerCase();
     return title.startsWith("bulk youtube") ||
@@ -5918,6 +6105,7 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
     <main>
       <section className="section admin">
         <AdminMetadataSearch />
+        <AdminMetadataAuditPanel uploads={uploads} onEdit={onEdit} />
 
         <div className="details">
           <div>
@@ -6070,9 +6258,10 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
           </div>
         </div>
         <h2><Shield size={24} /> Admin Cloudflare</h2>
+        <p className="mutedText">Stats Admin: {adminStatsMode}{adminCatalogStatsError ? ` · ${adminCatalogStatsError}` : ""}</p>
         <div className="stats">
           <div><strong>{movies.length}</strong><span>Filme</span></div>
-          <div><strong>{uploads.length}</strong><span>Upload-uri</span></div>
+          <div><strong>{adminUploadTotal}</strong><span>Upload-uri</span></div>
           <div><strong>ON</strong><span>D1</span></div>
         </div>
 
@@ -6083,7 +6272,7 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
             <p>Indexează toate upload-urile din Cloudflare D1 în Algolia uploads și verifică statusul ultimului sync.</p>
 
             <div className="stats">
-              <div><strong>{uploads.length}</strong><span>Upload-uri locale</span></div>
+              <div><strong>{adminUploadTotal}</strong><span>Upload-uri D1</span></div>
               <div><strong>{lastAlgoliaSync?.synced ?? "-"}</strong><span>Ultimul sync</span></div>
               <div><strong>{lastAlgoliaSync?.failed ?? "-"}</strong><span>Eșuate</span></div>
             </div>

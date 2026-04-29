@@ -2961,3 +2961,41 @@ body.cv-high-contrast textarea:focus {
   margin: 0;
   font-size: 0.85rem;
 }
+
+/* Admin Metadata Audit v1 */
+.adminMetadataAuditPanel {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.auditList {
+  display: grid;
+  gap: 10px;
+}
+
+.auditItem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auditItem p {
+  margin: 4px 0;
+  opacity: 0.8;
+}
+
+@media (max-width: 720px) {
+  .auditItem {
+    grid-template-columns: 1fr;
+  }
+}
