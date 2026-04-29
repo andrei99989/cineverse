@@ -1,4 +1,4 @@
-export const API_URL = "https://wispy-bonus-3fda.iri20rob94.workers.dev";
+export const API_URL = "https://jolly-sea-36fd.iri20rob94.workers.dev";
 
 export async function apiGet(path) {
   const response = await fetch(`${API_URL}${path}`);
