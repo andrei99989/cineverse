@@ -51,7 +51,7 @@ const CINEVERSE_INSTALL_CHECKLIST = [
 ];
 
 const CINEVERSE_DEPLOY_INFO = {
-  publicUrl: "https://rapid-tree-eb79.iri20rob94.workers.dev/",
+  publicUrl: "https://jolly-sea-36fd.iri20rob94.workers.dev/",
   buildCommand: "npm run build",
   outputDirectory: "dist",
   productionBuild: "Verificat",
