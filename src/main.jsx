@@ -1776,6 +1776,7 @@ function App() {
           onSave={async (id, payload) => {
             await updateUpload(id, payload);
             setEditingUpload(null);
+            await loadCloudflareData();
           }}
         />
       )}
