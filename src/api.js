@@ -1,6 +1,6 @@
 export const API_URL =
   localStorage.getItem("cineverse_api_url") ||
-  "https://jolly-sea-36fd.iri20rob94.workers.dev";
+  "https://wispy-bonus-3fda.iri20rob94.workers.dev";
 
 export async function apiGet(path) {
   const response = await fetch(`${API_URL}${path}`);
