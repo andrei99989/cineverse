@@ -1835,7 +1835,7 @@ function App() {
 
       {page === "settings" && <SettingsCenter />}
 
-      {page === "admin" && <AdminPage movies={movies} uploads={uploads} addMovie={addMovie} deleteMovie={deleteMovie} syncUploadsToAlgolia={syncUploadsToAlgolia} lastAlgoliaSync={lastAlgoliaSync} adminAlgoliaMessage={adminAlgoliaMessage} setAdminAlgoliaMessage={setAdminAlgoliaMessage} onEdit={setEditingUpload} setPage={setPage} />}
+      {page === "admin" && <AdminPage uploads={uploads} syncUploadsToAlgolia={syncUploadsToAlgolia} lastAlgoliaSync={lastAlgoliaSync} adminAlgoliaMessage={adminAlgoliaMessage} setAdminAlgoliaMessage={setAdminAlgoliaMessage} onEdit={setEditingUpload} setPage={setPage} />}
     </div>
   );
 }
@@ -6047,7 +6047,7 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
 }
 
 
-function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage, onEdit, setPage }) {
+function AdminPage({ uploads, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage, onEdit, setPage }) {
   const [adminCatalogStats, setAdminCatalogStats] = useState(null);
   const [adminCatalogStatsError, setAdminCatalogStatsError] = useState("");
 
