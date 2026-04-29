@@ -2910,3 +2910,54 @@ body.cv-high-contrast textarea:focus {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.055);
 }
+
+/* Upload metadata complete fields v1 */
+.uploadMetadataGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.uploadMetadataGrid label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
+.uploadMetadataGrid .wideField {
+  grid-column: 1 / -1;
+}
+
+/* AI Library metadata badges v1 */
+.metadataBadgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.metadataBadgeRow span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  background: rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+}
+
+.metadataMiniInfo {
+  display: grid;
+  gap: 2px;
+  margin: 6px 0;
+  opacity: 0.88;
+}
+
+.metadataMiniInfo p {
+  margin: 0;
+  font-size: 0.85rem;
+}

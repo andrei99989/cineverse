@@ -1,3 +1,9 @@
+
+function isRealMetaValue(value) {
+  const v = String(value || "").trim();
+  if (!v) return false;
+  return !["all", "general", "nespecificat", "fără subtitrare / nespecificat", "fără dublaj / nespecificat"].includes(v.toLowerCase());
+}
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -2633,6 +2639,125 @@ function UploadPage({ uploads, addUpload, deleteUpload, updateUpload, onEdit, on
             <label>Poster URL real</label>
             <input name="posterUrl" placeholder="https://site.com/poster.jpg" />
 
+            <div className="uploadMetadataGrid">
+              <label>
+                Categorie
+                <select name="category" defaultValue="Filme">
+                  <option>Filme</option>
+                  <option>Seriale</option>
+                  <option>Desene Animate Filme</option>
+                  <option>Desene Animate Seriale</option>
+                  <option>Anime-uri Filme</option>
+                  <option>Anime-uri Seriale</option>
+                  <option>Filme Bollywood</option>
+                  <option>Seriale Bollywood</option>
+                  <option>Filme Desene Dublate</option>
+                  <option>Seriale Desene Dublate</option>
+                  <option>Sport</option>
+                  <option>Muzică</option>
+                  <option>All Collection</option>
+                  <option>Disney</option>
+                  <option>DC</option>
+                  <option>Marvell</option>
+                  <option>Minimax</option>
+                  <option>Cartoon Network</option>
+                  <option>Fox Kids</option>
+                  <option>Nickelodeon</option>
+                  <option>Animax</option>
+                  <option>Boomerang</option>
+                  <option>Disney Junior</option>
+                  <option>Disney Channel</option>
+                  <option>JimJam</option>
+                  <option>Baby TV</option>
+                  <option>Filme Război</option>
+                  <option>Tv Show-uri</option>
+                </select>
+              </label>
+
+              <label>
+                Gen
+                <input name="genre" placeholder="Acțiune, Comedie, Anime, Sport..." />
+              </label>
+
+              <label>
+                An
+                <input name="year" type="number" min="1900" max="2100" placeholder="2026" />
+              </label>
+
+              <label>
+                Țară
+                <input name="country" placeholder="România, Japonia, USA..." />
+              </label>
+
+              <label>
+                Limbă
+                <input name="language" placeholder="Română, Engleză, Japoneză..." />
+              </label>
+
+              <label>
+                Calitate video
+                <select name="videoQuality" defaultValue="1080p">
+                  <option>144p</option>
+                  <option>240p</option>
+                  <option>360p</option>
+                  <option>480p</option>
+                  <option>720p</option>
+                  <option>1080p</option>
+                  <option>1440p</option>
+                  <option>2160p</option>
+                  <option>4320p</option>
+                  <option>7680p</option>
+                </select>
+              </label>
+
+              <label>
+                Subtitrare
+                <select name="subtitleLanguage" defaultValue="">
+                  <option value="">Fără subtitrare / Nespecificat</option>
+                  <option>Română</option>
+                  <option>Engleză</option>
+                  <option>Japoneză</option>
+                  <option>Coreeană</option>
+                  <option>Hindi</option>
+                  <option>Turcă</option>
+                  <option>Franceză</option>
+                  <option>Germană</option>
+                  <option>Spaniolă</option>
+                </select>
+              </label>
+
+              <label>
+                Dublaj
+                <select name="dubbingLanguage" defaultValue="">
+                  <option value="">Fără dublaj / Nespecificat</option>
+                  <option>Română</option>
+                  <option>Engleză</option>
+                  <option>Japoneză</option>
+                  <option>Coreeană</option>
+                  <option>Hindi</option>
+                  <option>Turcă</option>
+                  <option>Franceză</option>
+                  <option>Germană</option>
+                  <option>Spaniolă</option>
+                </select>
+              </label>
+
+              <label>
+                Franciză
+                <input name="franchise" placeholder="Marvel, Avatar, Zorro..." />
+              </label>
+
+              <label>
+                Colecție
+                <input name="collection" placeholder="Avatar Collection, X-Men Collection..." />
+              </label>
+
+              <label className="wideField">
+                Tags
+                <input name="tags" placeholder="anime, actiune, familie, youtube" />
+              </label>
+            </div>
+
             <label>Tip sursă</label>
             <select name="sourceType" defaultValue="Auto Detect">
               <option>Auto Detect</option>
@@ -2955,7 +3080,17 @@ const [libraryVideoQuality, setLibraryVideoQuality] = useState(() => readAiLibra
     withoutTags: uploads.filter((upload) => !Array.isArray(upload.metadata?.tags) || upload.metadata.tags.length === 0).length
   };
 
-  const smartEmptyActions = [
+  const qualityPanelTotal = Number(catalogStats?.total || 0) || libraryQuality.total;
+const qualityPanelMissingPoster = catalogStats?.quality ? Number(catalogStats.quality.missingPoster || 0) : libraryQuality.withoutPoster;
+const qualityPanelMissingGenre = catalogStats?.quality ? Number(catalogStats.quality.missingGenre || 0) : libraryQuality.withoutGenre;
+const qualityPanelMissingYear = catalogStats?.quality ? Number(catalogStats.quality.missingYear || 0) : libraryQuality.withoutYear;
+const qualityPanelMissingTags = catalogStats?.quality ? Number(catalogStats.quality.missingTags || 0) : libraryQuality.withoutTags;
+const qualityPanelWithPoster = Math.max(0, qualityPanelTotal - qualityPanelMissingPoster);
+const qualityPanelWithGenre = Math.max(0, qualityPanelTotal - qualityPanelMissingGenre);
+const qualityPanelWithYear = Math.max(0, qualityPanelTotal - qualityPanelMissingYear);
+const qualityPanelWithTags = Math.max(0, qualityPanelTotal - qualityPanelMissingTags);
+
+const smartEmptyActions = [
     libraryQuery.trim() ? {
       label: "Elimină căutarea",
       detail: libraryQuery,
@@ -4772,36 +4907,36 @@ const [libraryVideoQuality, setLibraryVideoQuality] = useState(() => readAiLibra
 
             <div className="details">
               <div>
-                <h3>AI Library Quality Panel</h3>
+                <h3>AI Library Quality Panel</h3>                <p className="mutedText">{catalogStats?.total ? "Stats server-side din Cloudflare D1" : "Stats locale fallback"}</p>
                 <p>Verifică rapid cât de completă este biblioteca ta AI.</p>
 
                 <div className="stats">
-                  <div><strong>{libraryQuality.total}</strong><span>Total</span></div>
-                  <div><strong>{libraryQuality.withPoster}</strong><span>Cu poster</span></div>
-                  <div><strong>{libraryQuality.withGenre}</strong><span>Cu gen</span></div>
-                  <div><strong>{libraryQuality.withYear}</strong><span>Cu an</span></div>
-                  <div><strong>{libraryQuality.withTags}</strong><span>Cu tags</span></div>
+                  <div><strong>{qualityPanelTotal}</strong><span>Total</span></div>
+                  <div><strong>{qualityPanelWithPoster}</strong><span>Cu poster</span></div>
+                  <div><strong>{qualityPanelWithGenre}</strong><span>Cu gen</span></div>
+                  <div><strong>{qualityPanelWithYear}</strong><span>Cu an</span></div>
+                  <div><strong>{qualityPanelWithTags}</strong><span>Cu tags</span></div>
                 </div>
 
                 <div className="activeFilterChips">
-                  {libraryQuality.withoutPoster > 0 && (
+                  {qualityPanelMissingPoster > 0 && (
                     <button className="filterChip" onClick={() => { setLibraryQualityFilter("missingPoster"); setPage(1); }}>
-                      Fără poster: {libraryQuality.withoutPoster}
+                      Fără poster: {qualityPanelMissingPoster}
                     </button>
                   )}
-                  {libraryQuality.withoutGenre > 0 && (
+                  {qualityPanelMissingGenre > 0 && (
                     <button className="filterChip" onClick={() => { setLibraryQualityFilter("missingGenre"); setPage(1); }}>
-                      Fără gen: {libraryQuality.withoutGenre}
+                      Fără gen: {qualityPanelMissingGenre}
                     </button>
                   )}
-                  {libraryQuality.withoutYear > 0 && (
+                  {qualityPanelMissingYear > 0 && (
                     <button className="filterChip" onClick={() => { setLibraryQualityFilter("missingYear"); setPage(1); }}>
-                      Fără an: {libraryQuality.withoutYear}
+                      Fără an: {qualityPanelMissingYear}
                     </button>
                   )}
-                  {libraryQuality.withoutTags > 0 && (
+                  {qualityPanelMissingTags > 0 && (
                     <button className="filterChip" onClick={() => { setLibraryQualityFilter("missingTags"); setPage(1); }}>
-                      Fără tags: {libraryQuality.withoutTags}
+                      Fără tags: {qualityPanelMissingTags}
                     </button>
                   )}
                 </div>
@@ -4883,7 +5018,7 @@ const [libraryVideoQuality, setLibraryVideoQuality] = useState(() => readAiLibra
         </div>
 
         <div className="librarySummary">
-          <span>Total upload-uri: {uploads.length}</span>
+          <span>Total upload-uri: {catalogMode ? catalogStats?.total || catalogTotal : uploads.length}</span>
           <span>Rezultate filtrate: {catalogMode ? catalogTotal : filteredLibraryUploads.length}</span>
           <span>Pagina: {currentPage} / {totalPages}</span>
         </div>
@@ -4963,7 +5098,21 @@ function UploadPosterCard({ upload, onPlay, onDelete, onEdit, onInfo }) {
         <span className="pill">{metadata.category || upload.sourceType}</span>
         <h3>{upload.title}</h3>
         <p>{metadata.genre || "General"} {metadata.year ? `· ${metadata.year}` : ""}</p>
-        {metadata.collection && <p>Collection: {metadata.collection}</p>}
+
+        <div className="metadataBadgeRow">
+          {isRealMetaValue(metadata.country) && <span>{metadata.country}</span>}
+          {isRealMetaValue(metadata.language) && <span>{metadata.language}</span>}
+          {isRealMetaValue(metadata.videoQuality || metadata.quality) && <span>{metadata.videoQuality || metadata.quality}</span>}
+          {isRealMetaValue(metadata.subtitleLanguage) && <span>Sub: {metadata.subtitleLanguage}</span>}
+          {isRealMetaValue(metadata.dubbingLanguage) && <span>Dublaj: {metadata.dubbingLanguage}</span>}
+        </div>
+
+        {(metadata.franchise || metadata.collection) && (
+          <div className="metadataMiniInfo">
+            {metadata.franchise && <p>Franciză: {metadata.franchise}</p>}
+            {metadata.collection && <p>Colecție: {metadata.collection}</p>}
+          </div>
+        )}
 
         <div className="row">
           <button onClick={() => onPlay(upload)}><Play size={16} /> Redă</button>

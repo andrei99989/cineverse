@@ -96,6 +96,11 @@ export default function EditUploadModal({ upload, onClose, onSave }) {
   const [quickCategory, setQuickCategory] = useState(metadata.category || "");
   const [quickCollection, setQuickCollection] = useState(metadata.collection || "");
   const [quickFranchise, setQuickFranchise] = useState(metadata.franchise || "");
+  const [quickCountry, setQuickCountry] = useState(metadata.country || "");
+  const [quickLanguage, setQuickLanguage] = useState(metadata.language || "");
+  const [quickVideoQuality, setQuickVideoQuality] = useState(metadata.videoQuality || metadata.quality || "");
+  const [quickSubtitleLanguage, setQuickSubtitleLanguage] = useState(metadata.subtitleLanguage || "");
+  const [quickDubbingLanguage, setQuickDubbingLanguage] = useState(metadata.dubbingLanguage || "");
   const [quickTags, setQuickTags] = useState(tagsToString(metadata.tags));
 
   function applyAiMetadata() {
