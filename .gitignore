@@ -17,3 +17,4 @@ android/local.properties
 
 # Backup zip-uri
 *.zip
+.local-backups/
