@@ -6364,7 +6364,8 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
         </div>
       </section>
 
-      <section className="section adminGrid">
+      {false && (
+        <section className="section adminGrid">
         <form className="movieForm" onSubmit={addMovie}>
           <h2>Adaugă film</h2>
           <label>Titlu</label><input name="title" required />
@@ -6397,6 +6398,7 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
           ))}
         </div>
       </section>
+      )}
     </main>
   );
 }
