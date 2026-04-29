@@ -2791,8 +2791,7 @@ function UploadPage({ uploads, addUpload, deleteUpload, updateUpload, onEdit, on
               </div>
             </div>
 
-            <label>Calitate</label>
-            <input name="quality" placeholder="HD / Full HD / 4K" />
+            {/* Calitate este gestionată prin câmpul Calitate video. */}
 
             <label>Notițe manuale</label>
             <textarea name="notes" placeholder="Gen, an, categorie, colecție, franciză..." />
