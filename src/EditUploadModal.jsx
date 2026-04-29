@@ -127,6 +127,12 @@ export default function EditUploadModal({ upload, onClose, onSave }) {
       category: quickCategory || "",
       collection: quickCollection || "",
       franchise: quickFranchise || "",
+      country: quickCountry || "",
+      language: quickLanguage || "",
+      videoQuality: quickVideoQuality || "",
+      quality: quickVideoQuality || "",
+      subtitleLanguage: quickSubtitleLanguage || "",
+      dubbingLanguage: quickDubbingLanguage || "",
       tags: stringToTags(quickTags),
       aiMetadataMode: aiMetadataOn ? "on" : "manual"
     };
@@ -231,6 +237,67 @@ export default function EditUploadModal({ upload, onClose, onSave }) {
                 <label>
                   Franciză
                   <input value={quickFranchise} onChange={(event) => setQuickFranchise(event.target.value)} placeholder="Avatar" />
+                </label>
+
+                <label>
+                  Țară
+                  <select value={quickCountry} onChange={(event) => setQuickCountry(event.target.value)}>
+                    <option value="">Nespecificat</option>
+                    <option value="Statele Unite">Statele Unite</option>
+                    <option value="România">România</option>
+                    <option value="Japonia">Japonia</option>
+                    <option value="India">India</option>
+                    <option value="Coreea de Sud">Coreea de Sud</option>
+                    <option value="Turcia">Turcia</option>
+                    <option value="Brazilia">Brazilia</option>
+                    <option value="Franța">Franța</option>
+                    <option value="Regatul Unit">Regatul Unit</option>
+                  </select>
+                </label>
+
+                <label>
+                  Limbă
+                  <select value={quickLanguage} onChange={(event) => setQuickLanguage(event.target.value)}>
+                    <option value="">Nespecificat</option>
+                    <option value="Engleză">Engleză</option>
+                    <option value="Română">Română</option>
+                    <option value="Japoneză">Japoneză</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Coreeană">Coreeană</option>
+                    <option value="Turcă">Turcă</option>
+                    <option value="Franceză">Franceză</option>
+                    <option value="Germană">Germană</option>
+                  </select>
+                </label>
+
+                <label>
+                  Calitate video
+                  <select value={quickVideoQuality} onChange={(event) => setQuickVideoQuality(event.target.value)}>
+                    <option value="">Nespecificat</option>
+                    <option value="HD">HD</option>
+                    <option value="Full HD">Full HD</option>
+                    <option value="4K">4K</option>
+                    <option value="CAM">CAM</option>
+                    <option value="Trailer">Trailer</option>
+                  </select>
+                </label>
+
+                <label>
+                  Subtitrare
+                  <select value={quickSubtitleLanguage} onChange={(event) => setQuickSubtitleLanguage(event.target.value)}>
+                    <option value="">Fără / Nespecificat</option>
+                    <option value="Română">Română</option>
+                    <option value="Engleză">Engleză</option>
+                  </select>
+                </label>
+
+                <label>
+                  Dublaj
+                  <select value={quickDubbingLanguage} onChange={(event) => setQuickDubbingLanguage(event.target.value)}>
+                    <option value="">Fără / Nespecificat</option>
+                    <option value="Română">Română</option>
+                    <option value="Engleză">Engleză</option>
+                  </select>
                 </label>
 
                 <label>
