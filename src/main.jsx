@@ -954,7 +954,7 @@ function CineVerseCountryFallbackPage({ onGoToLibrary }) {
     params.set("page", "library");
     params.set("aiCountry", country);
     window.history.pushState({}, "", `/?${params.toString()}`);
-    onGoToLibrary?.();
+    onGoToLibrary?.(quality);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
@@ -1048,7 +1048,7 @@ function CineVerseGlobalFilterFallbackPage({ onGoToLibrary }) {
     if (quality !== "All") params.set("aiVideoQuality", quality);
 
     window.history.pushState({}, "", `/?${params.toString()}`);
-    onGoToLibrary?.();
+    onGoToLibrary?.(quality);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
@@ -1199,7 +1199,7 @@ function SimpleCountriesPageFinal({ onGoToLibrary }) {
     params.set("page", "library");
     params.set("aiCountry", country);
     window.history.pushState({}, "", `/?${params.toString()}`);
-    onGoToLibrary?.();
+    onGoToLibrary?.(quality);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
@@ -1300,7 +1300,7 @@ function SimpleGlobalFilterPageFinal({ onGoToLibrary }) {
     if (quality !== "All") params.set("aiVideoQuality", quality);
 
     window.history.pushState({}, "", `/?${params.toString()}`);
-    onGoToLibrary?.();
+    onGoToLibrary?.(quality);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
@@ -5985,7 +5985,7 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
       url.searchParams.set("aiQuality", quality);
       window.history.replaceState({}, "", url.toString());
     } catch {}
-    onGoToLibrary?.();
+    onGoToLibrary?.(quality);
   };
 
   return (
@@ -6017,6 +6017,9 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
         <button type="button" onClick={() => goToQualityFilter("missingPoster")}>Vezi fără poster</button>
         <button type="button" onClick={() => goToQualityFilter("missingGenre")}>Vezi fără gen</button>
         <button type="button" onClick={() => goToQualityFilter("missingYear")}>Vezi fără an</button>
+          <button type="button" onClick={() => goToQualityFilter("missingCountry")}>Vezi fără țară</button>
+          <button type="button" onClick={() => goToQualityFilter("missingLanguage")}>Vezi fără limbă</button>
+          <button type="button" onClick={() => goToQualityFilter("missingQuality")}>Vezi fără calitate</button>
         <button type="button" onClick={() => goToQualityFilter("missingTags")}>Vezi fără tags</button>
       </div>
 
