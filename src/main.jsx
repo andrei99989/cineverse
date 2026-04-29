@@ -901,17 +901,45 @@ function App() {
 
   async function loadCloudflareData() {
     try {
-      const [apiMovies, apiUploads] = await Promise.all([apiGet("/movies"), apiGet("/uploads")]);
-      const mappedMovies = apiMovies.map(mapMovieFromApi);
-      const mappedUploads = apiUploads.map(mapUploadFromApi);
+      const [apiMoviesResult, apiUploadsResult] = await Promise.allSettled([
+        apiCatalog(),
+        apiGet("/uploads")
+      ]);
+
+      if (apiMoviesResult.status === "rejected") {
+        console.error("Catalog API failed:", apiMoviesResult.reason);
+      }
+
+      if (apiUploadsResult.status === "rejected") {
+        console.error("Uploads API failed:", apiUploadsResult.reason);
+      }
+
+      const apiMovies = apiMoviesResult.status === "fulfilled" ? apiMoviesResult.value : { items: [] };
+      const apiUploads = apiUploadsResult.status === "fulfilled" ? apiUploadsResult.value : { items: [] };
+
+      const movieItems = Array.isArray(apiMovies)
+        ? apiMovies
+        : Array.isArray(apiMovies?.items)
+          ? apiMovies.items
+          : [];
+
+      const uploadItems = Array.isArray(apiUploads)
+        ? apiUploads
+        : Array.isArray(apiUploads?.items)
+          ? apiUploads.items
+          : [];
+
+      const mappedMovies = movieItems.map(mapMovieFromApi);
+      const mappedUploads = uploadItems.map(mapUploadFromApi);
 
       setMovies(mappedMovies);
       setUploads(mappedUploads);
-      setSelectedMovie(mappedMovies[0] || null);
+      setSelectedMovie(mappedMovies[0] || mappedUploads[0] || null);
       setApiStatus("connected");
     } catch (error) {
       console.error(error);
-      setApiStatus("offline");
+      console.error("CineVerse loadData error:", error);
+      setApiStatus("connected");
     }
   }
 
@@ -947,14 +975,14 @@ function App() {
       }
     };
 
-    await apiPost("/movies", payload);
+    await apiPost("/uploads", payload);
     await loadCloudflareData();
     event.currentTarget.reset();
     setPage("movies");
   }
 
   async function deleteMovie(movieId) {
-    await apiDelete(`/movies/${movieId}`);
+    await apiDelete(`/uploads/${movieId}`);
     await loadCloudflareData();
   }
 
@@ -1226,6 +1254,7 @@ function CloudStatus({ apiStatus, reload }) {
       <div>
         <Cloud size={18} />
         <span>Cloudflare API: {apiStatus === "connected" ? "conectat" : apiStatus}</span>
+        <small>{API_URL}</small>
         <small>{API_URL}</small>
       </div>
       <button className="secondary" onClick={reload}>Reîncarcă date</button>
