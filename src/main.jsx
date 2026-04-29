@@ -1573,6 +1573,7 @@ function App() {
       movieTitle: form.get("movieTitle"),
       season: form.get("season"),
       episode: form.get("episode"),
+      videoQuality: form.get("videoQuality"),
       quality: form.get("videoQuality"),
       notes
     };
