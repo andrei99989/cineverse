@@ -6365,36 +6365,13 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
       </section>
 
       <section className="section adminGrid">
-        <form className="movieForm" onSubmit={addMovie}>
-          <h2>Adaugă film</h2>
-          <label>Titlu</label><input name="title" required />
-          <label>Titlu original</label><input name="originalTitle" />
-          <label>An</label><input name="year" required type="number" />
-          <label>Gen</label><input name="genre" required />
-          <label>Rating</label><input name="rating" required type="number" min="1" max="10" step="0.1" />
-          <label>Durată</label><input name="duration" required placeholder="112 min" />
-          <label>Poster URL real</label><input name="posterUrl" placeholder="https://site.com/poster.jpg" />
-          <div className="miniGrid">
-            <div><label>Limbă</label><input name="language" /></div>
-            <div><label>Țară</label><input name="country" /></div>
+        <div className="details">
+          <div>
+            <h2>Gestionare conținut</h2>
+            <p>Adăugarea filmelor și completarea metadata se fac acum din pagina Upload și din Edit metadata.</p>
+            <p className="mutedText">Formularul vechi „Adaugă film” din Admin a fost retras ca să nu dubleze fluxul principal de upload-uri.</p>
+            <button type="button" className="secondary" onClick={() => setPage?.("upload")}>Mergi la Upload</button>
           </div>
-          <label>Regizor</label><input name="director" />
-          <label>Descriere</label><textarea name="description" required />
-          <button type="submit"><Database size={18} /> Salvează film</button>
-        </form>
-
-        <div className="adminList">
-          <h2>Filme existente</h2>
-          {movies.map((movie) => (
-            <div className="adminItem" key={movie.id}>
-              {movie.poster ? <img src={movie.poster} alt={movie.title} /> : <div className="miniPoster">N/A</div>}
-              <div>
-                <strong>{movie.title}</strong>
-                <span>{movie.year} · {movie.genre}</span>
-              </div>
-              <button className="danger iconOnly" onClick={() => deleteMovie(movie.id)}><Trash2 size={18} /></button>
-            </div>
-          ))}
         </div>
       </section>
     </main>
