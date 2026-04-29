@@ -5952,9 +5952,9 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit }) {
         missingPoster: Number(serverQuality?.missingPoster || 0),
         missingGenre: Number(serverQuality?.missingGenre || 0),
         missingYear: Number(serverQuality?.missingYear || 0),
-        missingCountry: totals.missingCountry,
-        missingLanguage: totals.missingLanguage,
-        missingQuality: totals.missingQuality
+        missingCountry: Number(serverQuality?.missingCountry || 0),
+        missingLanguage: Number(serverQuality?.missingLanguage || 0),
+        missingQuality: Number(serverQuality?.missingQuality || 0)
       }
     : totals;
 
