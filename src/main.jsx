@@ -6140,6 +6140,65 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
     }
   };
 
+  const isMissingBulkMetaValue = (value) => {
+    const v = String(value || "").trim().toLowerCase();
+    return !v || v === "all" || v === "general" || v === "unknown" || v === "nespecificat";
+  };
+
+  const handleFixBulkMissingMetadata = async () => {
+    const targets = bulkQualityAuditPreview.filter((item) => item?.id);
+
+    if (!targets.length) {
+      setBulkAuditActionMessage("Nu există itemuri Bulk de completat.");
+      return;
+    }
+
+    setBulkAuditActionMessage("Completez metadata lipsă pentru " + targets.length + " itemuri Bulk...");
+
+    let updated = 0;
+    let failed = 0;
+
+    for (const item of targets) {
+      try {
+        const metadata = item.metadata || {};
+        const qualityValue = metadata.videoQuality || metadata.quality;
+
+        const nextMetadata = {
+          ...metadata,
+          category: isMissingBulkMetaValue(metadata.category) ? "Filme" : metadata.category,
+          genre: isMissingBulkMetaValue(metadata.genre) ? "General" : metadata.genre,
+          country: isMissingBulkMetaValue(metadata.country) ? "Statele Unite" : metadata.country,
+          language: isMissingBulkMetaValue(metadata.language) ? "Engleză" : metadata.language,
+          videoQuality: isMissingBulkMetaValue(qualityValue) ? "HD" : qualityValue,
+          quality: isMissingBulkMetaValue(qualityValue) ? "HD" : qualityValue,
+          tags: Array.isArray(metadata.tags) && metadata.tags.length
+            ? metadata.tags
+            : ["Bulk", item.sourceType || item.source_type || "YouTube", "HD"]
+        };
+
+        await apiPut(`/uploads/${item.id}`, {
+          title: item.title || "",
+          inputType: item.inputType || item.input_type || "url",
+          sourceType: item.sourceType || item.source_type || "YouTube",
+          value: item.value || item.url || "",
+          posterUrl: item.posterUrl || item.poster_url || "",
+          metadata: nextMetadata
+        });
+
+        updated += 1;
+      } catch (error) {
+        console.error(error);
+        failed += 1;
+      }
+    }
+
+    setBulkAuditActionMessage("Bulk metadata completată: " + updated + " actualizate, " + failed + " eșuate. Reîncarc datele...");
+
+    window.setTimeout(() => {
+      window.location.reload();
+    }, 900);
+  };
+
   return (
     <main>
       <section className="section admin">
@@ -6177,6 +6236,11 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
                 <li>URL: {bulkAuditSourceCounts.url}</li>
                 <li>Other: {bulkAuditSourceCounts.other}</li>
               </ul>
+              <div className="quickActions">
+                <button type="button" className="secondary" onClick={handleFixBulkMissingMetadata}>
+                  Completează Bulk lipsuri
+                </button>
+              </div>
               {bulkAuditActionMessage && <p className="mutedText">{bulkAuditActionMessage}</p>}
               {bulkQualityAuditItems.length > bulkQualityAuditLimit && (
                 <p className="mutedText">
