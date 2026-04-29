@@ -1,6 +1,19 @@
 node_modules/
 dist/
 .env
-.env.*
-.DS_Store
-npm-debug.log*
+.env.local
+
+# Logs / teste locale
+*.log
+test-cineverse-*.txt
+cineverse-api-test.json
+cineverse-page-test.html
+
+# Android build/cache
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# Backup zip-uri
+*.zip

@@ -1922,3 +1922,991 @@ button.success {
   background: rgba(251, 191, 36, 0.12);
   font-size: 0.85rem;
 }
+
+/* Filter Wizard v1 */
+.filterWizardBox {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  padding: 18px;
+  margin: 18px 0;
+}
+
+.wizardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.wizardSelectedCountry {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+  min-width: 180px;
+  display: grid;
+  gap: 4px;
+}
+
+.wizardStepsBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.wizardStepsBar button {
+  border-radius: 999px;
+  padding: 8px 12px;
+}
+
+.wizardStepsBar button.active {
+  outline: 2px solid currentColor;
+}
+
+.wizardStepsBar button.done {
+  opacity: .8;
+}
+
+.wizardStep {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.wizardStep select,
+.wizardStep input {
+  width: 100%;
+  max-width: 520px;
+}
+
+.wizardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.wizardGrid label {
+  display: grid;
+  gap: 6px;
+}
+
+.wizardSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.wizardSummary span {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.wizardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Settings Center v1 */
+.settingsCenter {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.settingsActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.settingsLayout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.settingsSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 18px;
+  padding: 12px;
+  position: sticky;
+  top: 12px;
+}
+
+.settingsNav {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  justify-content: flex-start;
+  text-align: left;
+  width: 100%;
+  border-radius: 13px;
+  padding: 10px 12px;
+}
+
+.settingsNav.active {
+  background: rgba(220, 38, 38, 0.24);
+  border-color: rgba(248, 113, 113, 0.55);
+}
+
+.settingsPanel {
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.settingsPanelHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.settingsPanelHeader h3 {
+  margin: 0 0 5px;
+}
+
+.settingsPanelHeader p {
+  margin: 0;
+  color: var(--muted, #94a3b8);
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.settingsField,
+.settingsToggle {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: rgba(2, 6, 23, 0.36);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 15px;
+  padding: 12px;
+}
+
+.settingsField span,
+.settingsToggle span {
+  color: #e5e7eb;
+  font-weight: 700;
+}
+
+.settingsToggle {
+  flex-direction: row;
+  align-items: center;
+}
+
+.settingsToggle input {
+  width: auto;
+  min-width: 18px;
+}
+
+.settingsInfo,
+.successBox {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  border-radius: 15px;
+  padding: 12px;
+  color: #bbf7d0;
+}
+
+html[data-cineverse-theme="Light"] body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+html[data-cineverse-contrast="Ridicat"] {
+  filter: contrast(1.12);
+}
+
+html[data-cineverse-text-size="Mare"] body {
+  font-size: 18px;
+}
+
+html[data-cineverse-text-size="Foarte mare"] body {
+  font-size: 20px;
+}
+
+@media (max-width: 900px) {
+  .settingsLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .settingsSidebar {
+    position: static;
+  }
+
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Global Filter Wizard */
+.globalFilterWizard {
+  display: grid;
+  gap: 18px;
+}
+
+.wizardHero {
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wizardHero h2 {
+  margin: 10px 0 8px;
+}
+
+.wizardSelectedBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.wizardSelectedBar span,
+.wizardReference {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.wizardSteps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wizardSteps button.done {
+  border-color: rgba(34, 197, 94, 0.55);
+}
+
+.wizardPanel {
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wizardReference {
+  display: inline-flex;
+  margin-bottom: 14px;
+}
+
+.wizardOptionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  max-height: 430px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.wizardOptionsGrid button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.wizardOptionsGrid button.selected {
+  border-color: rgba(220, 38, 38, 0.9);
+  background: rgba(220, 38, 38, 0.20);
+}
+
+.wizardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Country Page */
+.countryPage {
+  display: grid;
+  gap: 18px;
+}
+
+.countryHero {
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.countryHero h2 {
+  margin: 10px 0 8px;
+}
+
+.countrySearchBar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.countrySearchBar input {
+  flex: 1;
+  min-width: 240px;
+}
+
+.countrySelectedBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.countryGroups {
+  display: grid;
+  gap: 16px;
+}
+
+.countryGroup {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.countryGroup h3 {
+  margin: 0 0 12px;
+}
+
+.countryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.countryGrid button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.countryGrid button.selected {
+  border-color: rgba(220, 38, 38, 0.9);
+  background: rgba(220, 38, 38, 0.20);
+}
+
+/* Settings Page */
+.settingsPage {
+  display: grid;
+  gap: 18px;
+}
+
+.settingsHero {
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settingsHero h2 {
+  margin: 10px 0 8px;
+}
+
+.settingsActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settingsSavedMessage {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.30);
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+.settingsCard {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settingsCard h3 {
+  margin: 0;
+}
+
+.settingsCard label {
+  display: grid;
+  gap: 7px;
+}
+
+.settingsCard textarea {
+  min-height: 110px;
+}
+
+.settingsInfoList {
+  display: grid;
+  gap: 8px;
+}
+
+.settingsInfoList span {
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.switchLine {
+  display: flex !important;
+  align-items: center;
+  grid-template-columns: none !important;
+  flex-direction: row;
+  gap: 10px !important;
+}
+
+.switchLine input {
+  width: auto;
+}
+
+/* Applied Settings: themes + accessibility */
+body.cv-theme-light {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+body.cv-theme-light .app,
+body.cv-theme-light .section,
+body.cv-theme-light .card,
+body.cv-theme-light .settingsCard,
+body.cv-theme-light .countryGroup,
+body.cv-theme-light .wizardPanel,
+body.cv-theme-light .movieCard,
+body.cv-theme-light .uploadCard {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.14) !important;
+}
+
+body.cv-theme-light input,
+body.cv-theme-light select,
+body.cv-theme-light textarea {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+body.cv-theme-light .mutedText,
+body.cv-theme-light .empty,
+body.cv-theme-light small {
+  color: #475569;
+}
+
+body.cv-theme-red-cinema {
+  background:
+    radial-gradient(circle at top left, rgba(220, 38, 38, 0.28), transparent 34%),
+    linear-gradient(135deg, #09090b, #18181b 60%, #450a0a);
+}
+
+body.cv-theme-blue-stream {
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.26), transparent 34%),
+    linear-gradient(135deg, #020617, #0f172a 60%, #172554);
+}
+
+body.cv-text-small {
+  font-size: 14px;
+}
+
+body.cv-text-normal {
+  font-size: 16px;
+}
+
+body.cv-text-large {
+  font-size: 18px;
+}
+
+body.cv-text-extra-large {
+  font-size: 20px;
+}
+
+body.cv-high-contrast {
+  filter: contrast(1.16);
+}
+
+body.cv-high-contrast button,
+body.cv-high-contrast input,
+body.cv-high-contrast select,
+body.cv-high-contrast textarea,
+body.cv-high-contrast .section,
+body.cv-high-contrast .card,
+body.cv-high-contrast .settingsCard {
+  border-width: 2px !important;
+}
+
+body.cv-high-contrast button:focus,
+body.cv-high-contrast input:focus,
+body.cv-high-contrast select:focus,
+body.cv-high-contrast textarea:focus {
+  outline: 3px solid rgba(250, 204, 21, 0.9);
+  outline-offset: 2px;
+}
+
+/* Settings preference preview */
+.settingsPreferencePreview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.settingsPreferencePreview span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Subtitle + dubbing filters */
+.libraryFilterHint {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Stable subtitle/dubbing settings status */
+.subtitleDubbingStatus {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.subtitleDubbingStatus h3 {
+  margin: 10px 0 8px;
+}
+
+.subtitleDubbingStatus p {
+  margin: 0;
+}
+
+.subtitleDubbingPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.subtitleDubbingPills span {
+  padding: 9px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Playback Preferences */
+.playbackPreferencesPage {
+  display: grid;
+  gap: 18px;
+}
+
+.playbackHero {
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.playbackHero h2 {
+  margin: 10px 0 8px;
+}
+
+.playbackSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.playbackSummary span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.playbackGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+/* Robust fallback pages for Countries + Global Filter */
+.countryFallbackPage,
+.globalFilterFallbackPage {
+  display: grid;
+  gap: 18px;
+  min-height: 60vh;
+}
+
+.fallbackHero {
+  padding: 20px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.fallbackHero h2 {
+  margin: 10px 0 8px;
+}
+
+.fallbackToolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fallbackToolbar input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.fallbackGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.fallbackGrid button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.globalStepsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.globalStepsGrid label {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.filterSummaryBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.filterSummaryBox span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Final guaranteed render for Countries + Global Filter */
+.finalMenuPage {
+  display: grid !important;
+  gap: 16px;
+  min-height: 60vh;
+  padding: 18px !important;
+  margin: 16px !important;
+  background: rgba(15, 23, 42, 0.94) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 22px !important;
+  position: relative;
+  z-index: 5;
+}
+
+.finalMenuPage h2,
+.finalMenuPage p,
+.finalMenuPage label,
+.finalMenuPage span {
+  color: #f8fafc !important;
+}
+
+.finalMenuPage input,
+.finalMenuPage select {
+  width: 100%;
+  background: #020617 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+}
+
+.finalMenuGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.finalMenuGrid button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.finalFilterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.finalFilterGrid label {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+}
+
+.pageDebugBox {
+  margin: 10px 16px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(250, 204, 21, 0.15);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  color: #fefce8;
+  position: relative;
+  z-index: 6;
+}
+
+/* Global Filter year range */
+.finalFilterGrid label:nth-child(5),
+.finalFilterGrid label:nth-child(6) {
+  border-color: rgba(220, 38, 38, 0.22);
+}
+
+/* Global Filter reset/share actions */
+.globalFilterActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.globalFilterActions button {
+  width: auto;
+}
+
+/* Country selected/share box */
+.countrySelectedFinalBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.28);
+}
+
+.countrySelectedFinalBox span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.selectedCountryButton {
+  background: rgba(220, 38, 38, 0.25) !important;
+  border-color: rgba(220, 38, 38, 0.9) !important;
+}
+
+/* Countries A-Z groups */
+.countryAzGroups {
+  display: grid;
+  gap: 16px;
+}
+
+.countryAzGroup {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.countryAzGroup h3 {
+  margin: 0;
+  color: #f8fafc !important;
+}
+
+/* Global Filter stepper */
+.globalStepper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 10px;
+}
+
+.globalStepper button {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  justify-content: stretch;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.globalStepper button span {
+  font-size: 0.86em;
+  opacity: 0.82;
+}
+
+.globalStepper .activeStep {
+  background: rgba(220, 38, 38, 0.24) !important;
+  border-color: rgba(220, 38, 38, 0.85) !important;
+}
+
+.globalStepHint {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.28);
+}
+
+.activeGlobalField {
+  border-color: rgba(250, 204, 21, 0.65) !important;
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.12);
+}
+
+/* Global Filter final confirmation */
+.globalFilterFinalResult {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(34, 197, 94, 0.10);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.globalFilterFinalResult h3 {
+  margin: 0;
+}
+
+.globalFilterFinalResult p {
+  margin: 0;
+}
+
+.globalFilterFinalList {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) 1fr;
+  gap: 8px 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.globalFilterFinalList span {
+  opacity: 0.92;
+}
+
+/* Upload subtitle/dubbing metadata */
+.uploadPlaybackMetadata,
+.subtitleDubbingMetadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.uploadPlaybackMetadata span,
+.subtitleDubbingMetadata span {
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.10);
+  border: 1px solid rgba(34, 197, 94, 0.24);
+}
+
+/* Real PWA install box */
+.pwaInstallRealBox {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  margin: 14px 0;
+  border-radius: 20px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.pwaInstallRealBox strong {
+  color: #f8fafc;
+}
+
+.pwaInstallRealBox p {
+  margin: 0;
+  opacity: 0.86;
+}
+
+.pwaInstallRealBox button {
+  width: fit-content;
+}
+
+/* PWA Install Card Safe v2 */
+.pwaInstallCardSafe {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.pwaInstallCardSafe h3 {
+  margin: 0;
+}
+
+.pwaInstallCardSafe p,
+.pwaInstallCardSafe small {
+  margin: 0;
+  opacity: 0.88;
+}
+
+.pwaInstallCardSafe button {
+  width: fit-content;
+}
+
+.pwaInstallStatusGrid {
+  display: grid;
+  grid-template-columns: minmax(130px, auto) 1fr;
+  gap: 8px 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+}

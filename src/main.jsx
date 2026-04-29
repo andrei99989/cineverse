@@ -35,6 +35,50 @@ import AdminMetadataSearch from "./AdminMetadataSearch.jsx";
 import UploadMetadataSearch from "./UploadMetadataSearch.jsx";
 import EditUploadModal from "./EditUploadModal.jsx";
 import BulkImportPanel from "./BulkImportPanel.jsx";
+import GlobalFilterWizard from "./GlobalFilterWizard.jsx";
+import CountryPage from "./CountryPage.jsx";
+import SettingsPage from "./SettingsPage.jsx";
+import PlaybackPreferences from "./PlaybackPreferences.jsx";
+import SettingsCenter from "./SettingsCenter.jsx";
+import FilterWizard from "./FilterWizard.jsx";
+
+
+const CINEVERSE_SETTINGS_KEY = "cineverse_settings_v1";
+
+function readCineVerseSettings() {
+  try {
+    return JSON.parse(localStorage.getItem(CINEVERSE_SETTINGS_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function applyCineVerseVisualSettings(settings = readCineVerseSettings()) {
+  if (typeof document === "undefined") return;
+
+  const theme = settings.theme || "dark";
+  const textSize = settings.accessibilityText || "normal";
+  const highContrast = !!settings.highContrast;
+
+  document.body.classList.remove(
+    "cv-theme-dark",
+    "cv-theme-light",
+    "cv-theme-red-cinema",
+    "cv-theme-blue-stream",
+    "cv-text-small",
+    "cv-text-normal",
+    "cv-text-large",
+    "cv-text-extra-large",
+    "cv-high-contrast"
+  );
+
+  document.body.classList.add(`cv-theme-${theme}`);
+  document.body.classList.add(`cv-text-${textSize}`);
+
+  if (highContrast) {
+    document.body.classList.add("cv-high-contrast");
+  }
+}
 
 const CINEVERSE_VERSION = "1.0.1";
 const CINEVERSE_BUILD = "2026.04.28-bulk-import-v27-backend-scalable-audit-plan";
@@ -206,6 +250,8 @@ function readAiLibraryUrlFilters() {
     libraryCountry: params.get("aiCountry") || "",
     libraryLanguage: params.get("aiLanguage") || "",
     libraryYear: params.get("aiYear") || "",
+libraryFromYear: params.get("fromYear") || "",
+libraryToYear: params.get("toYear") || "",
     libraryVideoQuality: params.get("aiVideoQuality") || "",
     libraryQualityFilter: params.get("aiQuality") || "",
     librarySort: params.get("aiSort") || ""
@@ -878,8 +924,486 @@ function textFromHtml(value) {
   return String(value || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
+
+function CineVerseCountryFallbackPage({ onGoToLibrary }) {
+  const [query, setQuery] = useState("");
+
+  const countries = typeof COUNTRIES !== "undefined" && Array.isArray(COUNTRIES) ? COUNTRIES : [
+    "Afganistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Australia", "Austria",
+    "Belgia", "Brazilia", "Bulgaria", "Canada", "China", "Coreea de Sud", "Danemarca", "Egipt",
+    "Finlanda", "Franța", "Germania", "Grecia", "India", "Italia", "Japonia", "Mexic", "Norvegia",
+    "Olanda", "Polonia", "Portugalia", "Regatul Unit", "România", "Rusia", "Serbia", "Spania",
+    "Suedia", "Turcia", "Ucraina", "Ungaria", "USA", "Vietnam", "Zimbabwe"
+  ];
+
+  const clean = (value) => String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  const visibleCountries = countries.filter((country) => clean(country).includes(clean(query)));
+
+  function openCountry(country) {
+    const params = new URLSearchParams(window.location.search);
+    params.set("page", "library");
+    params.set("aiCountry", country);
+    window.history.pushState({}, "", `/?${params.toString()}`);
+    onGoToLibrary?.();
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
+  function buildFilterUrl() {
+    const params = new URLSearchParams();
+    params.set("page", "library");
+    if (country !== "All") params.set("aiCountry", country);
+    if (type !== "All") params.set("aiCategory", type);
+    if (genre !== "All") params.set("aiGenre", genre);
+    if (year !== "All") params.set("aiYear", year);
+    if (fromYear) params.set("fromYear", fromYear);
+    if (toYear) params.set("toYear", toYear);
+    if (language !== "All") params.set("aiLanguage", language);
+    if (quality !== "All") params.set("aiVideoQuality", quality);
+    return `${window.location.origin}/?${params.toString()}`;
+  }
+
+  function copyFilterLink() {
+    const url = buildFilterUrl();
+    navigator.clipboard?.writeText(url)
+      .then(() => alert("Link filtrat copiat."))
+      .catch(() => alert(url));
+  }
+
+  function resetFilters() {
+    setCountry("All");
+    setType("All");
+    setGenre("All");
+    setYear("All");
+    setFromYear("");
+    setToYear("");
+    setLanguage("All");
+    setQuality("All");
+    setActiveStep(1);
+  }
+
+  return (
+    <section className="section countryFallbackPage">
+      <div className="fallbackHero">
+        <span className="pill">Meniu Țări</span>
+        <h2>Țări</h2>
+        <p>Alege o țară ca să deschizi AI Library cu filtrul de țară aplicat.</p>
+      </div>
+
+      <div className="fallbackToolbar">
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Caută țară..."
+        />
+        <span className="pill">{visibleCountries.length} rezultate</span>
+      </div>
+
+      <div className="fallbackGrid">
+        {visibleCountries.map((country) => (
+          <button type="button" key={country} onClick={() => openCountry(country)}>
+            {country}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CineVerseGlobalFilterFallbackPage({ onGoToLibrary }) {
+  const [country, setCountry] = useState("All");
+  const [genre, setGenre] = useState("All");
+  const [year, setYear] = useState("All");
+  const [type, setType] = useState("All");
+  const [language, setLanguage] = useState("All");
+  const [quality, setQuality] = useState("All");
+
+  const countries = typeof COUNTRIES !== "undefined" && Array.isArray(COUNTRIES) ? COUNTRIES : ["România", "USA", "India", "Japonia", "Coreea de Sud", "Turcia", "Brazilia"];
+  const languages = typeof LANGUAGES !== "undefined" && Array.isArray(LANGUAGES) ? LANGUAGES : ["Română", "Engleză", "Hindi", "Japoneză", "Coreeană", "Turcă"];
+  const qualities = typeof VIDEO_QUALITIES !== "undefined" && Array.isArray(VIDEO_QUALITIES) ? VIDEO_QUALITIES : ["144p", "240p", "360p", "480p", "720p", "1080p", "1440p", "2160p", "4320p", "7680p"];
+  const categories = typeof CONTENT_CATEGORIES !== "undefined" && Array.isArray(CONTENT_CATEGORIES) ? CONTENT_CATEGORIES : ["Filme", "Seriale", "Desene Animate Filme", "Anime-uri Filme", "Sport", "Muzică", "Tv Show-uri"];
+  const genres = genre === "All" && typeof getGenresForCategory === "function" && type !== "All"
+    ? ["All", ...getGenresForCategory(type)]
+    : ["All", "Acțiune", "Aventură", "Comedie", "Dramă", "Fantezie", "Horror", "Mister", "Muzical", "Romantic", "Sci-Fi", "Thriller", "Sport"];
+
+  const years = ["All", ...Array.from({ length: 151 }, (_, index) => String(1950 + index))];
+
+  function applyFilters() {
+    const params = new URLSearchParams();
+    params.set("page", "library");
+    if (country !== "All") params.set("aiCountry", country);
+    if (genre !== "All") params.set("aiGenre", genre);
+    if (year !== "All") params.set("aiYear", year);
+    if (type !== "All") params.set("aiCategory", type);
+    if (language !== "All") params.set("aiLanguage", language);
+    if (quality !== "All") params.set("aiVideoQuality", quality);
+
+    window.history.pushState({}, "", `/?${params.toString()}`);
+    onGoToLibrary?.();
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
+  function resetFilters() {
+    setCountry("All");
+    setGenre("All");
+    setYear("All");
+    setType("All");
+    setLanguage("All");
+    setQuality("All");
+  }
+
+  return (
+    <section className="section globalFilterFallbackPage">
+      <div className="fallbackHero">
+        <span className="pill">Filtru Global</span>
+        <h2>Țară → Gen → An → Type → Limba → Calitate</h2>
+        <p>Alege filtrele în ordinea din prompt, apoi deschide rezultatele în AI Library.</p>
+      </div>
+
+      <div className="globalStepsGrid">
+        <label>
+          1. Țară
+          <select value={country} onChange={(event) => setCountry(event.target.value)}>
+            <option value="All">Toate țările</option>
+            {countries.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+
+        <label>
+          2. Type
+          <select value={type} onChange={(event) => { setType(event.target.value); setGenre("All"); }}>
+            <option value="All">Toate categoriile</option>
+            {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+
+        <label>
+          3. Gen
+          <select value={genre} onChange={(event) => setGenre(event.target.value)}>
+            {genres.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+
+        <label>
+          4. An
+          <select value={year} onChange={(event) => setYear(event.target.value)}>
+            {years.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+
+        <label>
+          5. Limba
+          <select value={language} onChange={(event) => setLanguage(event.target.value)}>
+            <option value="All">Toate limbile</option>
+            {languages.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+
+        <label>
+          6. Calitate
+          <select value={quality} onChange={(event) => setQuality(event.target.value)}>
+            <option value="All">Toate calitățile</option>
+            {qualities.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <div className="filterSummaryBox">
+        <strong>Selecție:</strong>
+        <span>Țară: {country}</span>
+        <span>Type: {type}</span>
+        <span>Gen: {genre}</span>
+        <span>An exact: {year}</span>
+        <span>Interval: {fromYear || "—"} - {toYear || "—"}</span>
+        <span>Limba: {language}</span>
+        <span>Calitate: {quality}</span>
+      </div>
+
+      <div className="wizardActions">
+        <div className="globalFilterActions">
+        <button type="button" onClick={applyFilters}>Aplică în AI Library</button>
+        <button type="button" className="secondary" onClick={copyFilterLink}>Copiază link filtru</button>
+        <button type="button" className="secondary" onClick={resetFilters}>Resetează filtrele</button>
+      </div>
+        <button type="button" className="secondary" onClick={resetFilters}>Resetează</button>
+      </div>
+    </section>
+  );
+}
+
+
+
+function normalizeCineVersePageName(page) {
+  const value = String(page || "").toLowerCase().trim();
+
+  if (["countries", "country", "tari", "țări", "tara", "țara"].includes(value)) {
+    return "countries";
+  }
+
+  if (["global-filter", "global", "filter-global", "filtru-global", "filtru global", "filter", "filters", "filtru"].includes(value)) {
+    return "global-filter";
+  }
+
+  return page;
+}
+
+
+
+function SimpleCountriesPageFinal({ onGoToLibrary }) {
+  const [query, setQuery] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const list = typeof COUNTRIES !== "undefined" && Array.isArray(COUNTRIES) ? COUNTRIES : [
+    "Afganistan","Albania","Algeria","Andorra","Angola","Argentina","Australia","Austria","Belgia","Brazilia",
+    "Bulgaria","Canada","China","Coreea de Sud","Danemarca","Egipt","Finlanda","Franța","Germania","Grecia",
+    "India","Italia","Japonia","Mexic","Olanda","Polonia","Portugalia","Regatul Unit","România","Rusia",
+    "Serbia","Spania","Suedia","Turcia","Ucraina","Ungaria","USA","Vietnam","Zimbabwe"
+  ];
+
+  const norm = (v) => String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const countries = list.filter((item) => norm(item).includes(norm(query)));
+  const groupedCountries = countries.reduce((acc, country) => {
+    const letter = String(country || "#").charAt(0).toUpperCase();
+    if (!acc[letter]) acc[letter] = [];
+    acc[letter].push(country);
+    return acc;
+  }, {});
+  const groupLetters = Object.keys(groupedCountries).sort((a, b) => a.localeCompare(b));
+
+  function buildCountryUrl(country) {
+    const params = new URLSearchParams();
+    params.set("page", "library");
+    params.set("aiCountry", country);
+    return `${window.location.origin}/?${params.toString()}`;
+  }
+
+  function selectCountry(country) {
+    setSelectedCountry(country);
+  }
+
+  function applyCountry(country = selectedCountry) {
+    if (!country) {
+      alert("Alege mai întâi o țară.");
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set("page", "library");
+    params.set("aiCountry", country);
+    window.history.pushState({}, "", `/?${params.toString()}`);
+    onGoToLibrary?.();
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
+  function copyCountryLink(country = selectedCountry) {
+    if (!country) {
+      alert("Alege mai întâi o țară.");
+      return;
+    }
+
+    const url = buildCountryUrl(country);
+    navigator.clipboard?.writeText(url)
+      .then(() => alert(`Link copiat pentru ${country}.`))
+      .catch(() => alert(url));
+  }
+
+  return (
+    <section className="section finalMenuPage">
+      <span className="pill">Meniu Țări</span>
+      <h2>Țări</h2>
+      <p>Alege o țară pentru a filtra conținutul după țara de origine.</p>
+
+      <input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Caută țară..."
+      />
+
+      <div className="countrySelectedFinalBox">
+        <strong>Țară selectată:</strong>
+        <span>{selectedCountry || "Nicio țară selectată"}</span>
+        <button type="button" onClick={() => applyCountry()}>Deschide în AI Library</button>
+        <button type="button" className="secondary" onClick={() => copyCountryLink()}>Copiază link</button>
+      </div>
+
+      <div className="countryAzGroups">
+        {groupLetters.map((letter) => (
+          <div className="countryAzGroup" key={letter}>
+            <h3>{letter}</h3>
+            <div className="finalMenuGrid">
+              {groupedCountries[letter].map((country) => (
+                <button
+                  type="button"
+                  key={country}
+                  className={selectedCountry === country ? "selectedCountryButton" : ""}
+                  onClick={() => selectCountry(country)}
+                  onDoubleClick={() => applyCountry(country)}
+                >
+                  {country}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SimpleGlobalFilterPageFinal({ onGoToLibrary }) {
+  const [activeStep, setActiveStep] = useState(1);
+  const [country, setCountry] = useState("All");
+  const [type, setType] = useState("All");
+  const [genre, setGenre] = useState("All");
+  const [year, setYear] = useState("All");
+  const [fromYear, setFromYear] = useState("");
+  const [toYear, setToYear] = useState("");
+  const [language, setLanguage] = useState("All");
+  const [quality, setQuality] = useState("All");
+
+  const countries = typeof COUNTRIES !== "undefined" && Array.isArray(COUNTRIES) ? COUNTRIES : ["România", "USA", "India", "Japonia", "Coreea de Sud", "Turcia"];
+  const categories = typeof CONTENT_CATEGORIES !== "undefined" && Array.isArray(CONTENT_CATEGORIES) ? CONTENT_CATEGORIES : ["Filme", "Seriale", "Anime-uri Filme", "Sport", "Muzică", "Tv Show-uri"];
+  const languages = typeof LANGUAGES !== "undefined" && Array.isArray(LANGUAGES) ? LANGUAGES : ["Română", "Engleză", "Hindi", "Japoneză"];
+  const qualities = typeof VIDEO_QUALITIES !== "undefined" && Array.isArray(VIDEO_QUALITIES) ? VIDEO_QUALITIES : ["144p", "240p", "360p", "480p", "720p", "1080p", "1440p", "2160p"];
+  const years = ["All", ...Array.from({ length: 151 }, (_, i) => String(1950 + i))];
+  const genres = type !== "All" && typeof getGenresForCategory === "function"
+    ? ["All", ...getGenresForCategory(type)]
+    : ["All", "Acțiune", "Aventură", "Comedie", "Dramă", "Fantezie", "Horror", "Mister", "Muzical", "Romantic", "Sci-Fi", "Thriller", "Sport"];
+
+  const steps = [
+    { id: 1, label: "Țară", value: country },
+    { id: 2, label: "Type", value: type },
+    { id: 3, label: "Gen", value: genre },
+    { id: 4, label: "An", value: year !== "All" ? year : `${fromYear || "—"} - ${toYear || "—"}` },
+    { id: 5, label: "Limba", value: language },
+    { id: 6, label: "Calitate", value: quality }
+  ];
+
+  function applyFilters() {
+    const params = new URLSearchParams();
+    params.set("page", "library");
+    if (country !== "All") params.set("aiCountry", country);
+    if (type !== "All") params.set("aiCategory", type);
+    if (genre !== "All") params.set("aiGenre", genre);
+    if (year !== "All") params.set("aiYear", year);
+    if (fromYear) params.set("fromYear", fromYear);
+    if (toYear) params.set("toYear", toYear);
+    if (language !== "All") params.set("aiLanguage", language);
+    if (quality !== "All") params.set("aiVideoQuality", quality);
+
+    window.history.pushState({}, "", `/?${params.toString()}`);
+    onGoToLibrary?.();
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
+  return (
+    <section className="section finalMenuPage">
+      <span className="pill">Filtru Global</span>
+      <h2>Țară → Gen → An → Type → Limba → Calitate</h2>
+      <p>Filtru pas cu pas pentru conținutul din AI Library.</p>
+
+      <div className="globalStepper">
+        {steps.map((step) => (
+          <button
+            type="button"
+            key={step.id}
+            className={activeStep === step.id ? "activeStep" : ""}
+            onClick={() => setActiveStep(step.id)}
+          >
+            <strong>{step.id}. {step.label}</strong>
+            <span>{step.value || "All"}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="globalStepHint">
+        Pas activ: <strong>{steps.find((step) => step.id === activeStep)?.label}</strong>
+      </div>
+
+      <div className="finalFilterGrid">
+        <label className={activeStep === 1 ? "activeGlobalField" : ""}>Țară
+          <select value={country} onChange={(e) => { setCountry(e.target.value); setActiveStep(2); }}>
+            <option value="All">Toate țările</option>
+            {countries.map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+        </label>
+
+        <label className={activeStep === 2 ? "activeGlobalField" : ""}>Type
+          <select value={type} onChange={(e) => { setType(e.target.value); setGenre("All"); setActiveStep(3); }}>
+            <option value="All">Toate categoriile</option>
+            {categories.map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+        </label>
+
+        <label className={activeStep === 3 ? "activeGlobalField" : ""}>Gen
+          <select value={genre} onChange={(e) => { setGenre(e.target.value); setActiveStep(4); }}>
+            {genres.map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+        </label>
+
+        <label className={activeStep === 4 ? "activeGlobalField" : ""}>An exact
+          <select value={year} onChange={(e) => { setYear(e.target.value); setActiveStep(5); }}>
+            {years.map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+        </label>
+
+        <label>De la anul
+          <select value={fromYear} onChange={(e) => setFromYear(e.target.value)}>
+            <option value="">Fără limită</option>
+            {years.filter((x) => x !== "All").map((x) => <option key={`from-${x}`} value={x}>{x}</option>)}
+          </select>
+        </label>
+
+        <label>Până la anul
+          <select value={toYear} onChange={(e) => setToYear(e.target.value)}>
+            <option value="">Fără limită</option>
+            {years.filter((x) => x !== "All").map((x) => <option key={`to-${x}`} value={x}>{x}</option>)}
+          </select>
+        </label>
+
+        <label className={activeStep === 5 ? "activeGlobalField" : ""}>Limba
+          <select value={language} onChange={(e) => { setLanguage(e.target.value); setActiveStep(6); }}>
+            <option value="All">Toate limbile</option>
+            {languages.map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+        </label>
+
+        <label className={activeStep === 6 ? "activeGlobalField" : ""}>Calitate
+          <select value={quality} onChange={(e) => setQuality(e.target.value)}>
+            <option value="All">Toate calitățile</option>
+            {qualities.map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <div className="filterSummaryBox">
+        <span>Țară: {country}</span>
+        <span>Type: {type}</span>
+        <span>Gen: {genre}</span>
+        <span>An: {year}</span>
+        <span>Limba: {language}</span>
+        <span>Calitate: {quality}</span>
+      </div>
+
+      <button type="button" onClick={applyFilters}>Aplică în AI Library</button>
+    </section>
+  );
+}
+
+function isFinalCountriesPage(page) {
+  return ["countries", "country", "tari", "tara", "țări", "țara"].includes(String(page || "").toLowerCase().trim());
+}
+
+function isFinalGlobalFilterPage(page) {
+  return ["global-filter", "global", "filter-global", "filtru-global", "filtru", "filter", "filters"].includes(String(page || "").toLowerCase().trim());
+}
+
+
 function App() {
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState(() => new URLSearchParams(window.location.search).get("page") || "home");
+  const pageKey = normalizeCineVersePageName(page);
   const [movies, setMovies] = useState([]);
   const [uploads, setUploads] = useState([]);
   const [apiStatus, setApiStatus] = useState("checking");
@@ -896,7 +1420,47 @@ function App() {
   const [watchlist, setWatchlist] = useState(() => JSON.parse(localStorage.getItem("cineverse_watchlist") || "[]"));
 
   useEffect(() => {
+    applyCineVerseVisualSettings();
+
+    const onSettingsChanged = (event) => {
+      applyCineVerseVisualSettings(event.detail || readCineVerseSettings());
+    };
+
+    window.addEventListener("cineverse-settings-changed", onSettingsChanged);
+    window.addEventListener("storage", onSettingsChanged);
+
+    return () => {
+      window.removeEventListener("cineverse-settings-changed", onSettingsChanged);
+      window.removeEventListener("storage", onSettingsChanged);
+    };
+  }, []);
+
+  useEffect(() => {
     loadCloudflareData();
+  }, []);
+
+  useEffect(() => {
+    function syncPageFromUrl() {
+      const urlPage = new URLSearchParams(window.location.search).get("page");
+      if (urlPage) setPage(urlPage);
+    }
+
+    function handleWizardApply() {
+      setPage("ai-library");
+      setTimeout(() => {
+        document.querySelector("[data-ai-library-page]")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    }
+
+    window.addEventListener("popstate", syncPageFromUrl);
+    window.addEventListener("cineverse-filter-wizard-apply", handleWizardApply);
+
+    syncPageFromUrl();
+
+    return () => {
+      window.removeEventListener("popstate", syncPageFromUrl);
+      window.removeEventListener("cineverse-filter-wizard-apply", handleWizardApply);
+    };
   }, []);
 
   async function loadCloudflareData() {
@@ -1171,14 +1735,33 @@ function App() {
         <nav>
           <button onClick={() => setPage("home")} className={page === "home" ? "active" : ""}><Home size={18} /> Home</button>
           <button onClick={() => setPage("movies")} className={page === "movies" ? "active" : ""}><ListVideo size={18} /> Filme</button>
+          <button onClick={() => setPage("global-filter")} className={pageKey === "global-filter" ? "active" : ""}><Globe2 size={18} /> Filtru Global</button>
+          <button onClick={() => setPage("countries")} className={pageKey === "countries" ? "active" : ""}><Globe2 size={18} /> Țări</button>
           <button onClick={() => setPage("upload")} className={page === "upload" ? "active" : ""}><Upload size={18} /> Upload</button>
           <button onClick={() => setPage("library")} className={page === "library" ? "active" : ""}><Play size={18} /> AI Library</button>
           <button onClick={() => setPage("download")} className={page === "download" ? "active" : ""}><Download size={18} /> Download</button>
+          <button onClick={() => setPage("settings")} className={page === "settings" ? "active" : ""}><Settings size={18} /> Setări</button>
+          <button onClick={() => setPage("playback")} className={page === "playback" ? "active" : ""}><PlayCircle size={18} /> Redare</button>
           <button onClick={() => setPage("admin")} className={page === "admin" ? "active" : ""}><Settings size={18} /> Admin</button>
         </nav>
       </header>
 
       <CloudStatus apiStatus={apiStatus} reload={loadCloudflareData} />
+
+        {(isFinalCountriesPage(page) || isFinalGlobalFilterPage(page)) && (
+          <div className="pageDebugBox">
+            Debug pagină: <strong>{String(page)}</strong>
+          </div>
+        )}
+
+        {isFinalCountriesPage(page) && (
+          <SimpleCountriesPageFinal onGoToLibrary={() => setPage("library")} />
+        )}
+
+        {isFinalGlobalFilterPage(page) && (
+          <SimpleGlobalFilterPageFinal onGoToLibrary={() => setPage("library")} />
+        )}
+
 
       {editingUpload && (
         <EditUploadModal
@@ -1242,6 +1825,8 @@ function App() {
       {page === "library" && <AiLibraryPage uploads={uploads} onPlay={playUpload} onEdit={setEditingUpload} onInfo={setInfoUpload} onDelete={deleteUpload} updateUpload={updateUpload} />}
 
       {page === "download" && <DownloadPage />}
+
+      {page === "settings" && <SettingsCenter />}
 
       {page === "admin" && <AdminPage movies={movies} uploads={uploads} addMovie={addMovie} deleteMovie={deleteMovie} syncUploadsToAlgolia={syncUploadsToAlgolia} lastAlgoliaSync={lastAlgoliaSync} adminAlgoliaMessage={adminAlgoliaMessage} setAdminAlgoliaMessage={setAdminAlgoliaMessage} />}
     </div>
@@ -1464,6 +2049,8 @@ function HomePage({ selectedMovie, setPage, movies, uploads, apiStatus, watchHis
           </div>
         </div>
       </section>
+      <FilterWizard />
+
 
       {lastAiRecommendation && (
         <section className="section">
@@ -2122,7 +2709,10 @@ function AiLibraryPage({ uploads, onPlay, onEdit, onInfo, onDelete, updateUpload
   const [libraryCountry, setLibraryCountry] = useState(() => readAiLibraryUrlFilters().libraryCountry || readAiLibraryFilterMemory().libraryCountry || "All");
   const [libraryLanguage, setLibraryLanguage] = useState(() => readAiLibraryUrlFilters().libraryLanguage || readAiLibraryFilterMemory().libraryLanguage || "All");
   const [libraryYear, setLibraryYear] = useState(() => readAiLibraryUrlFilters().libraryYear || readAiLibraryFilterMemory().libraryYear || "All");
-  const [libraryVideoQuality, setLibraryVideoQuality] = useState(() => readAiLibraryUrlFilters().libraryVideoQuality || readAiLibraryFilterMemory().libraryVideoQuality || "All");
+  
+  const [libraryFromYear, setLibraryFromYear] = useState(new URLSearchParams(window.location.search).get("fromYear") || "");
+  const [libraryToYear, setLibraryToYear] = useState(new URLSearchParams(window.location.search).get("toYear") || "");
+const [libraryVideoQuality, setLibraryVideoQuality] = useState(() => readAiLibraryUrlFilters().libraryVideoQuality || readAiLibraryFilterMemory().libraryVideoQuality || "All");
   const [catalogMode, setCatalogMode] = useState(true);
   const [catalogItems, setCatalogItems] = useState([]);
   const [catalogTotal, setCatalogTotal] = useState(0);
@@ -3609,6 +4199,8 @@ function AiLibraryPage({ uploads, onPlay, onEdit, onInfo, onDelete, updateUpload
         genre: libraryGenre,
         sourceType: librarySource,
         year: libraryYear,
+        fromYear: libraryFromYear,
+        toYear: libraryToYear,
         country: libraryCountry,
         language: libraryLanguage,
         videoQuality: libraryVideoQuality,
@@ -4472,6 +5064,94 @@ function VideoPlayerModal({ upload, onClose, recommendations, onPlay }) {
   );
 }
 
+
+function PwaInstallCardSafe() {
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [status, setStatus] = useState("Se verifică instalarea PWA...");
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    const standalone =
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      window.navigator.standalone === true;
+
+    setIsStandalone(!!standalone);
+
+    if (standalone) {
+      setStatus("CineVerse rulează deja ca aplicație instalată.");
+    } else if (!("serviceWorker" in navigator)) {
+      setStatus("Browserul nu suportă Service Worker. Folosește Chrome sau Edge pe Android.");
+    } else {
+      setStatus("Poți instala din meniul browserului sau din buton când promptul devine disponibil.");
+    }
+
+    const onBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+      setStatus("Instalarea este disponibilă. Apasă butonul Instalează aplicația.");
+    };
+
+    const onInstalled = () => {
+      setInstallPrompt(null);
+      setIsStandalone(true);
+      setStatus("CineVerse a fost instalată cu succes.");
+    };
+
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  async function installNow() {
+    if (!installPrompt) {
+      alert("Promptul Android nu este disponibil încă. Deschide Chrome → meniul ⋮ → Install app / Add to Home Screen.");
+      return;
+    }
+
+    installPrompt.prompt();
+    const choice = await installPrompt.userChoice.catch(() => null);
+
+    if (choice?.outcome === "accepted") {
+      setStatus("Instalare acceptată. Verifică ecranul principal al telefonului.");
+    } else {
+      setStatus("Instalarea a fost anulată.");
+    }
+
+    setInstallPrompt(null);
+  }
+
+  return (
+    <div className="pwaInstallCardSafe">
+      <span className="pill">Instalare Android PWA</span>
+      <h3>Instalează CineVerse pe telefon</h3>
+      <p>{status}</p>
+
+      <div className="pwaInstallStatusGrid">
+        <span>HTTPS / Pages</span>
+        <strong>{window.location.protocol === "https:" || window.location.hostname === "localhost" ? "OK" : "Necesită HTTPS"}</strong>
+        <span>Service Worker</span>
+        <strong>{"serviceWorker" in navigator ? "Suportat" : "Nesuportat"}</strong>
+        <span>Mod aplicație</span>
+        <strong>{isStandalone ? "Instalat" : "Browser"}</strong>
+      </div>
+
+      <button type="button" onClick={installNow}>
+        Instalează aplicația
+      </button>
+
+      <small>
+        Pe Android: Chrome / Edge → ⋮ → Install app sau Add to Home Screen.
+        Pe iPhone: Safari → Share → Add to Home Screen.
+      </small>
+    </div>
+  );
+}
+
+
 function DownloadPage() {
   const [pwaChecks, setPwaChecks] = useState([]);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
@@ -4746,6 +5426,7 @@ function DownloadPage() {
     <main>
       <section className="section">
         <h2><Download size={28} /> Download / Install Center</h2>
+        <PwaInstallCardSafe />
         <p>Instalează CineVerse pe Android, PC, tabletă și dispozitive compatibile.</p>
 
         <div className="downloadHero">

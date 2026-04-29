@@ -1,0 +1,9 @@
+{
+  "appId": "ro.cineverse.app",
+  "appName": "CineVerse",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
