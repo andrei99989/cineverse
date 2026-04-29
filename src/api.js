@@ -4,6 +4,10 @@ export async function apiGet(path) {
   const response = await fetch(`${API_URL}${path}`);
 
   if (!response.ok) {
+    if (path.startsWith("/presets")) {
+      console.warn(`Cloud presets offline, fallback empty: ${path}`);
+      return { ok: true, items: [] };
+    }
     throw new Error(`API GET failed: ${path}`);
   }
 
