@@ -6052,6 +6052,9 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [serverStats, setServerStats] = useState(null);
   const [serverStatsError, setServerStatsError] = useState("");
+  const [catalogAuditUploads, setCatalogAuditUploads] = useState([]);
+  const [catalogAuditError, setCatalogAuditError] = useState("");
+  const [catalogAuditLoading, setCatalogAuditLoading] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -6073,15 +6076,39 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
       }
     }
 
+    async function loadCatalogAuditUploads() {
+      try {
+        setCatalogAuditLoading(true);
+        setCatalogAuditError("");
+
+        const data = await apiCatalog({
+          page: 1,
+          limit: 100,
+          sort: "newest"
+        });
+
+        if (!alive) return;
+
+        setCatalogAuditUploads(Array.isArray(data?.items) ? data.items : []);
+      } catch (error) {
+        if (alive) setCatalogAuditError(String(error?.message || error));
+      } finally {
+        if (alive) setCatalogAuditLoading(false);
+      }
+    }
+
     loadServerStats();
+    loadCatalogAuditUploads();
 
     return () => {
       alive = false;
     };
   }, []);
 
+  const auditSourceUploads = catalogAuditUploads.length ? catalogAuditUploads : uploads;
+
   const auditItems = useMemo(() => {
-    return (uploads || [])
+    return (auditSourceUploads || [])
       .map((upload) => {
         const meta = getUploadAuditMeta(upload);
         const missing = getUploadAuditMissing(upload);
@@ -6096,7 +6123,7 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
         };
       })
       .sort((a, b) => a.score - b.score || b.missing.length - a.missing.length);
-  }, [uploads]);
+  }, [auditSourceUploads]);
 
   const filteredItems = useMemo(() => {
     if (activeFilter === "all") return auditItems;
@@ -6169,11 +6196,16 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
     <div className="adminMetadataAuditPanel">
       <div className="sectionHeader">
         <div>
-          <h3>Admin Metadata Audit v2</h3>
+          <h3>Admin Metadata Audit v3</h3>
           <p>Verifică rapid upload-urile care au metadata incompletă.</p>
           <p className="mutedText">
             {serverStats?.ok ? "Stats server-side din Cloudflare D1" : "Stats locale fallback"}
             {serverStatsError ? ` · ${serverStatsError}` : ""}
+          </p>
+          <p className="mutedText">
+            Sursă audit: {catalogAuditUploads.length ? `/catalog (${catalogAuditUploads.length} itemuri)` : `uploads local (${uploads.length} itemuri)`}
+            {catalogAuditLoading ? " · se încarcă..." : ""}
+            {catalogAuditError ? ` · ${catalogAuditError}` : ""}
           </p>
         </div>
         <span className="pill">{displayTotals.complete}/{displayTotals.total} complete</span>
