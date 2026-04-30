@@ -34,7 +34,19 @@ import {
   Play,
   Wand2
 } from "lucide-react";
-import { API_URL, apiDelete, apiGet, apiPost, apiPut, apiCatalog, apiCatalogStats, apiCatalogFacets } from "./api";
+import {
+  API_URL,
+  apiDelete,
+  apiGet,
+  apiPost,
+  apiPut,
+  apiCatalog,
+  apiCatalogStats,
+  apiCatalogFacets,
+  getAdminToken,
+  setAdminToken,
+  clearAdminToken
+} from "./api";
 import { CONTENT_CATEGORIES, getGenresForCategory, COUNTRIES, LANGUAGES, VIDEO_QUALITIES, VIDEO_QUALITY_LABELS, YEARS, SOURCE_TYPES, SETTINGS_GROUPS } from "./taxonomy";
 import "./style.css";
 import AdminMetadataSearch from "./AdminMetadataSearch.jsx";
@@ -6116,6 +6128,109 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
 }
 
 
+
+function AdminTokenPanel() {
+  const [token, setToken] = useState(() => getAdminToken());
+  const [visible, setVisible] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const hasToken = !!String(token || "").trim();
+
+  function saveToken() {
+    const clean = String(token || "").trim();
+
+    if (!clean) {
+      clearAdminToken();
+      setToken("");
+      setMessage("Token șters.");
+      return;
+    }
+
+    setAdminToken(clean);
+    setToken(clean);
+    setMessage("Token salvat pe acest dispozitiv.");
+  }
+
+  function removeToken() {
+    clearAdminToken();
+    setToken("");
+    setMessage("Token șters de pe acest dispozitiv.");
+  }
+
+  async function testToken() {
+    setMessage("Testez tokenul...");
+
+    try {
+      const response = await fetch(`${API_URL}/admin/init`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${String(token || "").trim()}`
+        }
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok && data.ok) {
+        setMessage("OK: token valid, /admin/init funcționează.");
+      } else {
+        setMessage(`Eroare: ${data.error || response.status || "token invalid"}`);
+      }
+    } catch (error) {
+      setMessage(`Eroare test token: ${error?.message || error}`);
+    }
+  }
+
+  return (
+    <section className="panel">
+      <h3>Admin Token</h3>
+      <p>
+        Tokenul se salvează doar pe acest telefon/browser și este folosit pentru Upload,
+        Edit, Ștergere, Presets și Sync Algolia.
+      </p>
+
+      <div className="formGrid">
+        <label>
+          ADMIN_TOKEN
+          <input
+            type={visible ? "text" : "password"}
+            value={token}
+            placeholder="Lipește tokenul admin"
+            onChange={(event) => {
+              setToken(event.target.value);
+              setMessage("");
+            }}
+          />
+        </label>
+      </div>
+
+      <div className="actions">
+        <button type="button" onClick={saveToken}>
+          Salvează token
+        </button>
+
+        <button type="button" className="secondary" onClick={() => setVisible(!visible)}>
+          {visible ? "Ascunde" : "Arată"}
+        </button>
+
+        <button type="button" className="secondary" onClick={testToken} disabled={!hasToken}>
+          Testează token
+        </button>
+
+        <button type="button" className="danger" onClick={removeToken}>
+          Șterge token
+        </button>
+      </div>
+
+      <p>
+        Status: <strong>{getAdminToken() ? "token salvat" : "token lipsă"}</strong>
+      </p>
+
+      {message && <p className="muted">{message}</p>}
+    </section>
+  );
+}
+
+
 function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage, onEdit, setPage }) {
   const [adminCatalogStats, setAdminCatalogStats] = useState(null);
   const [adminCatalogStatsError, setAdminCatalogStatsError] = useState("");
@@ -6522,6 +6637,7 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
           </div>
         </div>
         <h2><Shield size={24} /> Admin Cloudflare</h2>
+        <AdminTokenPanel />
         <p className="mutedText">Stats Admin: {adminStatsMode}{adminCatalogStatsError ? ` · ${adminCatalogStatsError}` : ""}</p>
         <div className="stats">
           <div><strong>{movies.length}</strong><span>Filme</span></div>
