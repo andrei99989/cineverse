@@ -229,8 +229,8 @@ export default function BulkImportPanel({ onDataChanged, onSendToMetadataSearch,
   const [preview, setPreview] = useState([]);
   const [category, setCategory] = useState("Filme");
   const [genre, setGenre] = useState("General");
-  const [country, setCountry] = useState("All");
-  const [language, setLanguage] = useState("All");
+  const [country, setCountry] = useState("Statele Unite");
+  const [language, setLanguage] = useState("Engleză");
   const [quality, setQuality] = useState("HD");
   const [importLimit, setImportLimit] = useState("all");
   const [bulkAiMetadataEnabled, setBulkAiMetadataEnabled] = useState(false);
