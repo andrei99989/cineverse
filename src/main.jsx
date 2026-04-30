@@ -6469,6 +6469,25 @@ function AdminAutoMetadataQueuePanel({ catalogItems = [], onEdit }) {
         if (lowerTitle.startsWith("bulk rumble")) return false;
         if (lowerTitle.startsWith("bulk url")) return false;
 
+        const sourceType = String(item?.sourceType || item?.source_type || "").toLowerCase();
+        const category = String(metadata.category || "").toLowerCase();
+        const genre = String(metadata.genre || "").toLowerCase();
+        const tags = Array.isArray(metadata.tags)
+          ? metadata.tags.map((tag) => String(tag || "").toLowerCase())
+          : [];
+
+        const looksLikeSport =
+          sourceType.includes("sport") ||
+          category.includes("sport") ||
+          genre.includes("fotbal") ||
+          genre.includes("football") ||
+          tags.includes("sport") ||
+          tags.includes("fotbal") ||
+          tags.includes("football") ||
+          /\b(real madrid|barcelona|atletico|vs)\b/i.test(title);
+
+        if (looksLikeSport) return false;
+
         const missingPoster = !item.posterUrl;
         const missingGenre = !isRealMetaValue(metadata.genre);
         const missingYear = !isRealMetaValue(metadata.year);
