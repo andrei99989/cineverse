@@ -1610,10 +1610,10 @@ function App() {
       sourceType,
       value,
       posterUrl,
-      metadata: {
-        ...manualMetadata,
-        ...aiMetadata
-      }
+        metadata: {
+          ...aiMetadata,
+          ...manualMetadata
+        }
     };
 
     const duplicates = findDuplicateUploads(uploads, payload);
