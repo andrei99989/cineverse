@@ -6455,6 +6455,9 @@ function AdminTokenPanel() {
 
 function AdminAutoMetadataQueuePanel({ catalogItems = [], onEdit }) {
   const [queueLimit, setQueueLimit] = useState(12);
+  const [metadataQueueMessage, setMetadataQueueMessage] = useState("");
+  const [metadataQueueResult, setMetadataQueueResult] = useState(null);
+  const [metadataQueueLoading, setMetadataQueueLoading] = useState(false);
 
   const candidates = useMemo(() => {
     return (catalogItems || [])
@@ -6518,6 +6521,50 @@ function AdminAutoMetadataQueuePanel({ catalogItems = [], onEdit }) {
   }, [catalogItems]);
 
   const visibleCandidates = candidates.slice(0, queueLimit);
+  const firstCandidate = candidates[0]?.item || null;
+
+  async function searchMetadataForFirstCandidate() {
+    if (!firstCandidate) {
+      setMetadataQueueMessage("Nu există candidat pentru metadata.");
+      return;
+    }
+
+    const query = String(firstCandidate.title || "").trim();
+
+    if (!query) {
+      setMetadataQueueMessage("Candidatul nu are titlu valid.");
+      return;
+    }
+
+    try {
+      setMetadataQueueLoading(true);
+      setMetadataQueueMessage("Caut metadata pentru: " + query);
+      setMetadataQueueResult(null);
+
+      const response = await fetch(`${API_URL}/search-metadata?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "Căutarea metadata a eșuat.");
+      }
+
+      const tmdb = Array.isArray(data.tmdb) ? data.tmdb : [];
+      const omdb = Array.isArray(data.omdb) ? data.omdb : [];
+
+      setMetadataQueueResult({
+        query,
+        item: firstCandidate,
+        tmdb,
+        omdb
+      });
+
+      setMetadataQueueMessage(`Metadata găsită pentru ${query}: TMDB ${tmdb.length}, OMDb ${omdb.length}.`);
+    } catch (error) {
+      setMetadataQueueMessage("Eroare metadata: " + String(error?.message || error));
+    } finally {
+      setMetadataQueueLoading(false);
+    }
+  }
 
   return (
     <div className="changelogBox">
@@ -6534,6 +6581,9 @@ function AdminAutoMetadataQueuePanel({ catalogItems = [], onEdit }) {
       ) : (
         <>
           <div className="quickActions">
+            <button type="button" className="secondary" onClick={searchMetadataForFirstCandidate} disabled={metadataQueueLoading || !firstCandidate}>
+              {metadataQueueLoading ? "Caut..." : "Caută metadata pentru primul"}
+            </button>
             <button type="button" className="secondary" onClick={() => setQueueLimit((n) => Math.min(n + 12, candidates.length))}>
               Arată mai multe
             </button>
@@ -6541,6 +6591,43 @@ function AdminAutoMetadataQueuePanel({ catalogItems = [], onEdit }) {
               Restrânge
             </button>
           </div>
+
+          {metadataQueueMessage && <p className="mutedText">{metadataQueueMessage}</p>}
+
+          {metadataQueueResult && (
+            <div className="metadataQueuePreview">
+              <h5>Rezultat metadata: {metadataQueueResult.query}</h5>
+
+              <div className="metadataBadgeRow">
+                <span>TMDB: {metadataQueueResult.tmdb.length}</span>
+                <span>OMDb: {metadataQueueResult.omdb.length}</span>
+              </div>
+
+              {metadataQueueResult.tmdb[0] && (
+                <div className="auditItem">
+                  <div>
+                    <strong>TMDB: {metadataQueueResult.tmdb[0].title || metadataQueueResult.tmdb[0].name}</strong>
+                    <p>
+                      {(metadataQueueResult.tmdb[0].release_date || metadataQueueResult.tmdb[0].first_air_date || "").slice(0, 4) || "an necunoscut"}
+                      {" · "}
+                      ⭐ {metadataQueueResult.tmdb[0].vote_average || "-"}
+                    </p>
+                    <p>{metadataQueueResult.tmdb[0].overview || "Fără descriere."}</p>
+                  </div>
+                </div>
+              )}
+
+              {metadataQueueResult.omdb[0] && (
+                <div className="auditItem">
+                  <div>
+                    <strong>OMDb: {metadataQueueResult.omdb[0].Title}</strong>
+                    <p>{metadataQueueResult.omdb[0].Year} · {metadataQueueResult.omdb[0].Type}</p>
+                    <p>{metadataQueueResult.omdb[0].imdbID}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="bulkAuditActionList">
             {visibleCandidates.map(({ item, missing, confidence }) => (
