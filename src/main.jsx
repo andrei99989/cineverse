@@ -4388,6 +4388,12 @@ const smartEmptyActions = [
     setCatalogError("");
 
     try {
+      const safeLibraryFromYear =
+        typeof libraryFromYear !== "undefined" ? libraryFromYear : "";
+
+      const safeLibraryToYear =
+        typeof libraryToYear !== "undefined" ? libraryToYear : "";
+
       const data = await apiCatalog({
         page,
         limit: PAGE_SIZE,
@@ -4396,8 +4402,8 @@ const smartEmptyActions = [
         genre: libraryGenre,
         sourceType: librarySource,
         year: libraryYear,
-        fromYear: libraryFromYear,
-        toYear: libraryToYear,
+        fromYear: safeLibraryFromYear,
+        toYear: safeLibraryToYear,
         country: libraryCountry,
         language: libraryLanguage,
         videoQuality: libraryVideoQuality,
