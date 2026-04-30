@@ -1,5 +1,56 @@
 const COUNTRY_LANGUAGE_RULES = [
   {
+    id: "latin-music-mexico",
+    terms: ["corridos", "banda", "norteño", "regional mexicano", "peso pluma", "natanael cano", "grupo firme", "musica mexicana", "música mexicana"],
+    category: "Muzică",
+    genre: "Regional Mexican",
+    country: "Mexic",
+    language: "Spaniolă",
+    contentType: "music",
+    confidence: 0.88
+  },
+  {
+    id: "latin-music-puerto-rico",
+    terms: ["reggaeton", "bad bunny", "daddy yankee", "anuel", "rauw alejandro", "ozuna", "puerto rico"],
+    category: "Muzică",
+    genre: "Reggaeton",
+    country: "Puerto Rico",
+    language: "Spaniolă",
+    contentType: "music",
+    confidence: 0.86
+  },
+  {
+    id: "usa-sports-nba-nfl",
+    terms: ["nba", "nfl", "super bowl", "los angeles lakers", "golden state warriors", "dallas cowboys", "miami heat", "chicago bulls"],
+    category: "Sport",
+    genre: "Sport SUA",
+    country: "Statele Unite",
+    language: "Engleză",
+    contentType: "sport",
+    confidence: 0.88
+  },
+  {
+    id: "uk-football",
+    terms: ["premier league", "manchester united", "manchester city", "liverpool", "chelsea", "arsenal", "tottenham"],
+    category: "Sport",
+    genre: "Fotbal",
+    country: "Regatul Unit",
+    language: "Engleză",
+    contentType: "sport",
+    confidence: 0.88
+  },
+  {
+    id: "france-football-entertainment",
+    terms: ["ligue 1", "psg", "paris saint-germain", "marseille", "lyon", "france tv", "tf1"],
+    category: "Sport",
+    genre: "Fotbal",
+    country: "Franța",
+    language: "Franceză",
+    contentType: "sport",
+    confidence: 0.84
+  },
+
+  {
     id: "anime-japan",
     terms: ["anime", "dragon ball", "naruto", "one piece", "demon slayer", "jujutsu", "pokemon", "pokémon", "bleach", "attack on titan", "sailor moon", "studio ghibli"],
     category: "Anime-uri Filme",
