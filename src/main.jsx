@@ -6469,6 +6469,14 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
 
 
   const [bulkAuditActionMessage, setBulkAuditActionMessage] = useState("");
+  const [bulkAutoFixEnabled, setBulkAutoFixEnabled] = useState(() => {
+    try {
+      return localStorage.getItem("cineverse_bulk_auto_fix_enabled") !== "off";
+    } catch {
+      return true;
+    }
+  });
+  const [bulkAutoFixRan, setBulkAutoFixRan] = useState(false);
 
   const handleCopyBulkAuditValue = async (item) => {
     const value = item?.value || item?.url || "";
@@ -6490,15 +6498,15 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
     return !v || v === "all" || v === "general" || v === "unknown" || v === "nespecificat";
   };
 
-  const handleFixBulkMissingMetadata = async () => {
+  const handleFixBulkMissingMetadata = async ({ silent = false } = {}) => {
     const targets = bulkQualityAuditPreview.filter((item) => item?.id);
 
     if (!targets.length) {
-      setBulkAuditActionMessage("Nu există itemuri Bulk de completat.");
+      if (!silent) setBulkAuditActionMessage("Nu există itemuri Bulk de completat.");
       return;
     }
 
-    setBulkAuditActionMessage("Completez metadata lipsă pentru " + targets.length + " itemuri Bulk...");
+    if (!silent) setBulkAuditActionMessage("Completez metadata lipsă pentru " + targets.length + " itemuri Bulk...");
 
     let updated = 0;
     let failed = 0;
@@ -6562,6 +6570,35 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
       language === "unknown"
     );
   };
+
+  useEffect(() => {
+    if (!bulkAutoFixEnabled) return;
+    if (bulkAutoFixRan) return;
+    if (!bulkQualityAuditPreview.length) return;
+
+    const sessionKey = "cineverse_bulk_auto_fix_ran_session";
+
+    try {
+      if (sessionStorage.getItem(sessionKey) === "yes") return;
+      sessionStorage.setItem(sessionKey, "yes");
+    } catch {}
+
+    setBulkAutoFixRan(true);
+    handleFixBulkMissingMetadata({ silent: true });
+  }, [bulkAutoFixEnabled, bulkAutoFixRan, bulkQualityAuditPreview.length]);
+
+  function toggleBulkAutoFix() {
+    const next = !bulkAutoFixEnabled;
+    setBulkAutoFixEnabled(next);
+
+    try {
+      localStorage.setItem("cineverse_bulk_auto_fix_enabled", next ? "on" : "off");
+      sessionStorage.removeItem("cineverse_bulk_auto_fix_ran_session");
+    } catch {}
+
+    setBulkAutoFixRan(false);
+    setBulkAuditActionMessage(next ? "Auto Bulk Fix activat." : "Auto Bulk Fix dezactivat.");
+  }
 
   const handleReprocessOldAiMetadata = async () => {
     const targets = (uploads || [])
@@ -6671,8 +6708,11 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
                 <li>Other: {bulkAuditSourceCounts.other}</li>
               </ul>
               <div className="quickActions">
-                <button type="button" className="secondary" onClick={handleFixBulkMissingMetadata}>
+                <button type="button" className="secondary" onClick={() => handleFixBulkMissingMetadata()}>
                   Completează Bulk lipsuri
+                </button>
+                <button type="button" className="secondary" onClick={toggleBulkAutoFix}>
+                  Auto Bulk Fix: {bulkAutoFixEnabled ? "ON" : "OFF"}
                 </button>
                 <button type="button" className="secondary" onClick={handleReprocessOldAiMetadata}>
                   Reprocesează AI metadata vechi
