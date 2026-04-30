@@ -5180,7 +5180,7 @@ function UploadPosterCard({ upload, onPlay, onDelete, onEdit, onInfo }) {
           {isRealMetaValue(metadata.country) && <span>{metadata.country}</span>}
           {isRealMetaValue(metadata.language) && <span>{metadata.language}</span>}
           {isRealMetaValue(metadata.videoQuality || metadata.quality) && <span>{metadata.videoQuality || metadata.quality}</span>}
-          {metadata.metadataRule && (
+          {metadata.metadataRule && metadata.metadataRule !== "fallback-default" && (
             <span>
               AI: {metadata.metadataRule}
               {metadata.metadataConfidence ? ` · ${Math.round(Number(metadata.metadataConfidence) * 100)}%` : ""}
