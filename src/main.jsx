@@ -1951,7 +1951,12 @@ function buildAiRecommendations(uploads = []) {
     "url",
     "upload",
     "uploads",
-    "collection"
+    "collection",
+    "bulk",
+    "bulk-import",
+    "hd",
+    "full hd",
+    "4k"
   ]);
 
   const genericGenres = new Set([
