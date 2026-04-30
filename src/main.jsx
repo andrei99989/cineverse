@@ -6535,6 +6535,41 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
     return !v || v === "all" || v === "general" || v === "unknown" || v === "nespecificat";
   };
 
+
+  function extractBulkVideoId(value = "") {
+    const raw = String(value || "");
+
+    try {
+      const url = new URL(raw);
+      if (url.hostname.includes("youtu.be")) {
+        return url.pathname.replace("/", "").split(/[?&/]/)[0] || "";
+      }
+
+      if (url.hostname.includes("youtube.com")) {
+        return url.searchParams.get("v") || url.pathname.split("/").filter(Boolean).pop() || "";
+      }
+    } catch {}
+
+    const match = raw.match(/(?:youtu\.be\/|v=|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{6,})/);
+    return match?.[1] || "";
+  }
+
+  function getFixedBulkTitle(item = {}) {
+    const title = String(item.title || "").trim();
+    const value = item.value || item.url || item.playableUrl || "";
+    const videoId = extractBulkVideoId(value);
+
+    if (/^bulk youtube 001$/i.test(title) && videoId) {
+      return `Bulk YouTube ${videoId}`;
+    }
+
+    if (/^bulk youtube$/i.test(title) && videoId) {
+      return `Bulk YouTube ${videoId}`;
+    }
+
+    return title || (videoId ? `Bulk YouTube ${videoId}` : "Bulk Upload");
+  }
+
   const handleFixBulkMissingMetadata = async ({ silent = false } = {}) => {
     const targets = bulkQualityAuditPreview.filter((item) => item?.id);
 
@@ -6567,7 +6602,7 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
         };
 
         await apiPut(`/uploads/${item.id}`, {
-          title: item.title || "",
+          title: getFixedBulkTitle(item),
           inputType: item.inputType || item.input_type || "url",
           sourceType: item.sourceType || item.source_type || "YouTube",
           value: item.value || item.url || "",
