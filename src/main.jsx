@@ -1569,12 +1569,34 @@ function App() {
 
     const sourceType = selectedType === "Auto Detect" && inputType === "url" ? detectSourceType(value) : selectedType;
 
+    const normalizeUploadMetaValue = (value, fallback) => {
+      const v = String(value || "").trim();
+      const low = v.toLowerCase();
+      if (!v || low === "all" || low === "unknown" || low === "nespecificat") return fallback;
+      return v;
+    };
+
+    const uploadVideoQuality = normalizeUploadMetaValue(form.get("videoQuality"), "HD");
+
     const manualMetadata = {
       movieTitle: form.get("movieTitle"),
+      category: normalizeUploadMetaValue(form.get("category"), "Filme"),
+      genre: normalizeUploadMetaValue(form.get("genre"), "General"),
+      year: form.get("year") || "",
+      country: normalizeUploadMetaValue(form.get("country"), "Statele Unite"),
+      language: normalizeUploadMetaValue(form.get("language"), "Engleză"),
+      videoQuality: uploadVideoQuality,
+      quality: uploadVideoQuality,
+      subtitleLanguage: form.get("subtitleLanguage") || "",
+      dubbingLanguage: form.get("dubbingLanguage") || "",
+      franchise: form.get("franchise") || "",
+      collection: form.get("collection") || "",
+      tags: String(form.get("tags") || "")
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
       season: form.get("season"),
       episode: form.get("episode"),
-      videoQuality: form.get("videoQuality"),
-      quality: form.get("videoQuality"),
       notes
     };
 
