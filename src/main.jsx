@@ -5957,7 +5957,99 @@ function DownloadPage() {
 }
 
 
+
+function getUploadAuditMeta(upload = {}) {
+  const metadata = upload.metadata || {};
+
+  const qualityValue =
+    metadata.videoQuality ||
+    metadata.quality ||
+    upload.videoQuality ||
+    upload.quality ||
+    "";
+
+  const sourceType =
+    upload.sourceType ||
+    upload.source_type ||
+    metadata.sourceType ||
+    metadata.source ||
+    "";
+
+  const posterUrl =
+    upload.posterUrl ||
+    upload.poster_url ||
+    metadata.posterUrl ||
+    metadata.poster ||
+    "";
+
+  const tags = Array.isArray(metadata.tags)
+    ? metadata.tags.filter(Boolean)
+    : typeof metadata.tags === "string"
+      ? metadata.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+      : [];
+
+  return {
+    title: upload.title || metadata.title || "Fără titlu",
+    sourceType: sourceType || "Sursă necunoscută",
+    posterUrl,
+    genre: metadata.genre || upload.genre || "",
+    year: metadata.year || upload.year || "",
+    country: metadata.country || "",
+    language: metadata.language || "",
+    quality: qualityValue,
+    category: metadata.category || "",
+    franchise: metadata.franchise || "",
+    collection: metadata.collection || "",
+    tags
+  };
+}
+
+function isAuditMetaMissing(value) {
+  const v = String(value || "").trim().toLowerCase();
+
+  return (
+    !v ||
+    v === "all" ||
+    v === "general" ||
+    v === "unknown" ||
+    v === "nespecificat" ||
+    v === "fără subtitrare / nespecificat" ||
+    v === "fără dublaj / nespecificat"
+  );
+}
+
+function getUploadAuditMissing(upload = {}) {
+  const m = getUploadAuditMeta(upload);
+  const missing = [];
+
+  if (isAuditMetaMissing(m.posterUrl)) missing.push("poster");
+  if (isAuditMetaMissing(m.genre)) missing.push("gen");
+  if (isAuditMetaMissing(m.year)) missing.push("an");
+  if (isAuditMetaMissing(m.country)) missing.push("țară");
+  if (isAuditMetaMissing(m.language)) missing.push("limbă");
+  if (isAuditMetaMissing(m.quality)) missing.push("calitate");
+  if (!m.tags.length) missing.push("tags");
+
+  return missing;
+}
+
+function getUploadAuditScore(upload = {}) {
+  const m = getUploadAuditMeta(upload);
+  let score = 0;
+
+  if (!isAuditMetaMissing(m.posterUrl)) score += 20;
+  if (!isAuditMetaMissing(m.genre)) score += 15;
+  if (!isAuditMetaMissing(m.year)) score += 15;
+  if (!isAuditMetaMissing(m.country)) score += 15;
+  if (!isAuditMetaMissing(m.language)) score += 15;
+  if (!isAuditMetaMissing(m.quality)) score += 10;
+  if (m.tags.length) score += 10;
+
+  return Math.min(100, score);
+}
+
 function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
+  const [activeFilter, setActiveFilter] = useState("all");
   const [serverStats, setServerStats] = useState(null);
   const [serverStatsError, setServerStatsError] = useState("");
 
@@ -5967,8 +6059,7 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
     async function loadServerStats() {
       try {
         setServerStatsError("");
-        const response = await fetch(`${API_URL}/catalog/stats`);
-        const data = await response.json();
+        const data = await apiCatalogStats();
 
         if (!alive) return;
 
@@ -5990,83 +6081,87 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
   }, []);
 
   const auditItems = useMemo(() => {
-    return uploads.map((upload) => {
-      const metadata = upload.metadata || {};
-      const missing = [];
+    return (uploads || [])
+      .map((upload) => {
+        const meta = getUploadAuditMeta(upload);
+        const missing = getUploadAuditMissing(upload);
+        const score = getUploadAuditScore(upload);
 
-      if (!upload.posterUrl) missing.push("poster");
-      if (!metadata.genre || metadata.genre === "General") missing.push("gen");
-      if (!metadata.year) missing.push("an");
-      if (!metadata.country || metadata.country === "All") missing.push("țară");
-      if (!metadata.language || metadata.language === "All") missing.push("limbă");
-      if (!metadata.videoQuality && !metadata.quality) missing.push("calitate");
-
-      return {
-        upload,
-        metadata,
-        missing,
-        score: Math.max(0, 100 - missing.length * 15)
-      };
-    }).sort((a, b) => a.score - b.score || b.missing.length - a.missing.length);
+        return {
+          upload,
+          meta,
+          missing,
+          score,
+          complete: missing.length === 0
+        };
+      })
+      .sort((a, b) => a.score - b.score || b.missing.length - a.missing.length);
   }, [uploads]);
 
-  const totals = useMemo(() => {
+  const filteredItems = useMemo(() => {
+    if (activeFilter === "all") return auditItems;
+    if (activeFilter === "complete") return auditItems.filter((item) => item.complete);
+    return auditItems.filter((item) => item.missing.includes(activeFilter));
+  }, [auditItems, activeFilter]);
+
+  const localTotals = useMemo(() => {
     const total = auditItems.length;
-    const withIssues = auditItems.filter((item) => item.missing.length > 0).length;
+    const complete = auditItems.filter((item) => item.complete).length;
 
     return {
       total,
-      withIssues,
-      complete: total - withIssues,
+      complete,
+      withIssues: Math.max(0, total - complete),
       missingPoster: auditItems.filter((item) => item.missing.includes("poster")).length,
       missingGenre: auditItems.filter((item) => item.missing.includes("gen")).length,
       missingYear: auditItems.filter((item) => item.missing.includes("an")).length,
       missingCountry: auditItems.filter((item) => item.missing.includes("țară")).length,
       missingLanguage: auditItems.filter((item) => item.missing.includes("limbă")).length,
-      missingQuality: auditItems.filter((item) => item.missing.includes("calitate")).length
+      missingQuality: auditItems.filter((item) => item.missing.includes("calitate")).length,
+      missingTags: auditItems.filter((item) => item.missing.includes("tags")).length
     };
   }, [auditItems]);
 
   const serverQuality = serverStats?.quality || null;
   const serverTotal = Number(serverStats?.total || 0);
 
+  const serverWorstMissing = serverQuality
+    ? Math.max(
+        Number(serverQuality.missingPoster || 0),
+        Number(serverQuality.missingGenre || 0),
+        Number(serverQuality.missingYear || 0),
+        Number(serverQuality.missingCountry || 0),
+        Number(serverQuality.missingLanguage || 0),
+        Number(serverQuality.missingQuality || 0),
+        Number(serverQuality.missingTags || 0)
+      )
+    : 0;
+
   const displayTotals = serverStats?.ok && serverTotal
     ? {
         total: serverTotal,
-        withIssues: Math.max(
-          Number(serverQuality?.missingPoster || 0),
-          Number(serverQuality?.missingGenre || 0),
-          Number(serverQuality?.missingYear || 0),
-          Number(serverQuality?.missingTags || 0)
-        ),
-        complete: Math.max(
-          0,
-          serverTotal -
-            Math.max(
-              Number(serverQuality?.missingPoster || 0),
-              Number(serverQuality?.missingGenre || 0),
-              Number(serverQuality?.missingYear || 0),
-              Number(serverQuality?.missingTags || 0)
-            )
-        ),
+        withIssues: serverWorstMissing,
+        complete: Math.max(0, serverTotal - serverWorstMissing),
         missingPoster: Number(serverQuality?.missingPoster || 0),
         missingGenre: Number(serverQuality?.missingGenre || 0),
         missingYear: Number(serverQuality?.missingYear || 0),
         missingCountry: Number(serverQuality?.missingCountry || 0),
         missingLanguage: Number(serverQuality?.missingLanguage || 0),
-        missingQuality: Number(serverQuality?.missingQuality || 0)
+        missingQuality: Number(serverQuality?.missingQuality || 0),
+        missingTags: Number(serverQuality?.missingTags || 0)
       }
-    : totals;
+    : localTotals;
 
-  const worstItems = auditItems.filter((item) => item.missing.length > 0).slice(0, 12);
+  const visibleItems = filteredItems.slice(0, 30);
 
   const goToQualityFilter = (quality) => {
     try {
       const url = new URL(window.location.href);
       url.searchParams.set("page", "library");
-      url.searchParams.set("aiQuality", quality);
+      url.searchParams.set("quality", quality);
       window.history.replaceState({}, "", url.toString());
     } catch {}
+
     onGoToLibrary?.(quality);
   };
 
@@ -6074,7 +6169,7 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
     <div className="adminMetadataAuditPanel">
       <div className="sectionHeader">
         <div>
-          <h3>Admin Metadata Audit</h3>
+          <h3>Admin Metadata Audit v2</h3>
           <p>Verifică rapid upload-urile care au metadata incompletă.</p>
           <p className="mutedText">
             {serverStats?.ok ? "Stats server-side din Cloudflare D1" : "Stats locale fallback"}
@@ -6093,31 +6188,63 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
         <div><strong>{displayTotals.missingCountry}</strong><span>Fără țară</span></div>
         <div><strong>{displayTotals.missingLanguage}</strong><span>Fără limbă</span></div>
         <div><strong>{displayTotals.missingQuality}</strong><span>Fără calitate</span></div>
+        <div><strong>{displayTotals.missingTags}</strong><span>Fără tags</span></div>
       </div>
 
       <div className="quickActions">
-        <button type="button" onClick={() => goToQualityFilter("missingPoster")}>Vezi fără poster</button>
-        <button type="button" onClick={() => goToQualityFilter("missingGenre")}>Vezi fără gen</button>
-        <button type="button" onClick={() => goToQualityFilter("missingYear")}>Vezi fără an</button>
-          <button type="button" onClick={() => goToQualityFilter("missingCountry")}>Vezi fără țară</button>
-          <button type="button" onClick={() => goToQualityFilter("missingLanguage")}>Vezi fără limbă</button>
-          <button type="button" onClick={() => goToQualityFilter("missingQuality")}>Vezi fără calitate</button>
-        <button type="button" onClick={() => goToQualityFilter("missingTags")}>Vezi fără tags</button>
+        <button type="button" onClick={() => setActiveFilter("all")}>Toate</button>
+        <button type="button" onClick={() => setActiveFilter("poster")}>Vezi fără poster</button>
+        <button type="button" onClick={() => setActiveFilter("gen")}>Vezi fără gen</button>
+        <button type="button" onClick={() => setActiveFilter("an")}>Vezi fără an</button>
+        <button type="button" onClick={() => setActiveFilter("țară")}>Vezi fără țară</button>
+        <button type="button" onClick={() => setActiveFilter("limbă")}>Vezi fără limbă</button>
+        <button type="button" onClick={() => setActiveFilter("calitate")}>Vezi fără calitate</button>
+        <button type="button" onClick={() => setActiveFilter("tags")}>Vezi fără tags</button>
+        <button type="button" onClick={() => setActiveFilter("complete")}>Vezi complete</button>
       </div>
 
-      {worstItems.length === 0 ? (
-        <p className="empty">Toate upload-urile au metadata completă.</p>
+      <div className="quickActions">
+        <button type="button" onClick={() => goToQualityFilter("missingPoster")}>Deschide fără poster în AI Library</button>
+        <button type="button" onClick={() => goToQualityFilter("missingGenre")}>Deschide fără gen în AI Library</button>
+        <button type="button" onClick={() => goToQualityFilter("missingYear")}>Deschide fără an în AI Library</button>
+        <button type="button" onClick={() => goToQualityFilter("missingCountry")}>Deschide fără țară în AI Library</button>
+        <button type="button" onClick={() => goToQualityFilter("missingLanguage")}>Deschide fără limbă în AI Library</button>
+        <button type="button" onClick={() => goToQualityFilter("missingQuality")}>Deschide fără calitate în AI Library</button>
+      </div>
+
+      <p className="mutedText">
+        Filtru audit: {activeFilter === "all" ? "toate itemurile" : activeFilter} · afișate {visibleItems.length}/{filteredItems.length}
+      </p>
+
+      {visibleItems.length === 0 ? (
+        <p className="empty">Nu există upload-uri pentru filtrul curent.</p>
       ) : (
         <div className="auditList">
-          {worstItems.map(({ upload, missing, score }) => (
+          {visibleItems.map(({ upload, meta, missing, score }) => (
             <div className="auditItem" key={upload.id}>
               <div>
-                <strong>{upload.title || "Fără titlu"}</strong>
-                <p>{upload.sourceType || "Sursă necunoscută"} · scor metadata {score}%</p>
+                <strong>{meta.title}</strong>
+                <p>{meta.sourceType} · scor metadata {score}%</p>
+
                 <div className="metadataBadgeRow">
-                  {missing.map((item) => <span key={item}>Lipsește: {item}</span>)}
+                  {meta.category && <span>{meta.category}</span>}
+                  {meta.genre && <span>{meta.genre}</span>}
+                  {meta.year && <span>{meta.year}</span>}
+                  {meta.country && <span>{meta.country}</span>}
+                  {meta.language && <span>{meta.language}</span>}
+                  {meta.quality && <span>{meta.quality}</span>}
+                  {meta.tags.slice(0, 4).map((tag) => <span key={tag}>#{tag}</span>)}
                 </div>
+
+                {missing.length ? (
+                  <div className="metadataBadgeRow">
+                    {missing.map((item) => <span key={item}>Lipsește: {item}</span>)}
+                  </div>
+                ) : (
+                  <p className="okText">Metadata completă.</p>
+                )}
               </div>
+
               <button type="button" onClick={() => onEdit?.(upload)}>Edit metadata</button>
             </div>
           ))}
@@ -6126,7 +6253,6 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
     </div>
   );
 }
-
 
 
 function AdminTokenPanel() {
