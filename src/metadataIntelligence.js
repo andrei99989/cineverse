@@ -1,0 +1,143 @@
+const COUNTRY_LANGUAGE_RULES = [
+  {
+    id: "anime-japan",
+    terms: ["anime", "dragon ball", "naruto", "one piece", "demon slayer", "jujutsu", "pokemon", "pokémon", "bleach", "attack on titan", "sailor moon", "studio ghibli"],
+    category: "Anime-uri Filme",
+    genre: "Anime",
+    country: "Japonia",
+    language: "Japoneză",
+    contentType: "anime",
+    confidence: 0.92
+  },
+  {
+    id: "bollywood-india",
+    terms: ["bollywood", "hindi", "india", "t-series", "zee cinema", "yrf", "shah rukh khan", "salman khan", "aamir khan"],
+    category: "Filme",
+    genre: "Bollywood",
+    country: "India",
+    language: "Hindi",
+    contentType: "movie",
+    confidence: 0.86
+  },
+  {
+    id: "korea-kdrama-kpop",
+    terms: ["k-drama", "kdrama", "k-pop", "kpop", "seoul", "bts", "blackpink", "korean drama", "coreean"],
+    category: "Seriale",
+    genre: "K-Drama",
+    country: "Coreea de Sud",
+    language: "Coreeană",
+    contentType: "series",
+    confidence: 0.84
+  },
+  {
+    id: "mexico-spanish-entertainment",
+    terms: ["méxico", "mexico", "mexican", "televisa", "azteca", "univision", "liga mx", "telenovela", "regional mexicano"],
+    category: "Entertainment",
+    genre: "Latin",
+    country: "Mexic",
+    language: "Spaniolă",
+    contentType: "entertainment",
+    confidence: 0.82
+  },
+  {
+    id: "spain-sport",
+    terms: ["la liga", "real madrid", "barcelona", "atletico madrid", "sevilla", "valencia", "copa del rey", "laliga"],
+    category: "Sport",
+    genre: "Fotbal",
+    country: "Spania",
+    language: "Spaniolă",
+    contentType: "sport",
+    confidence: 0.9
+  },
+  {
+    id: "turkey-series",
+    terms: ["turkish series", "dizi", "istanbul", "turcia", "turkish drama", "kanal d"],
+    category: "Seriale",
+    genre: "Dramă",
+    country: "Turcia",
+    language: "Turcă",
+    contentType: "series",
+    confidence: 0.8
+  },
+  {
+    id: "romania-local",
+    terms: ["românia", "romania", "romanian", "română", "pro tv", "antena 1", "kanal d romania"],
+    category: "Entertainment",
+    genre: "General",
+    country: "România",
+    language: "Română",
+    contentType: "entertainment",
+    confidence: 0.82
+  }
+];
+
+export function isMissingMetadataValue(value) {
+  const v = String(value || "").trim().toLowerCase();
+  return !v || v === "all" || v === "unknown" || v === "nespecificat" || v === "necunoscut";
+}
+
+export function detectMetadataIntelligence(input = {}) {
+  const text = [
+    input.title,
+    input.movieTitle,
+    input.category,
+    input.genre,
+    input.sourceType,
+    input.url,
+    input.notes,
+    input.description,
+    input.originalTitle
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  const matched = COUNTRY_LANGUAGE_RULES.find((rule) =>
+    rule.terms.some((term) => text.includes(term.toLowerCase()))
+  );
+
+  if (matched) {
+    return {
+      category: matched.category,
+      genre: matched.genre,
+      country: matched.country,
+      language: matched.language,
+      contentType: matched.contentType,
+      metadataRule: matched.id,
+      metadataConfidence: matched.confidence,
+      metadataStatus: "smart-detected"
+    };
+  }
+
+  return {
+    category: "Filme",
+    genre: "General",
+    country: "Statele Unite",
+    language: "Engleză",
+    contentType: "movie",
+    metadataRule: "fallback-default",
+    metadataConfidence: 0.45,
+    metadataStatus: "fallback"
+  };
+}
+
+export function completeMetadataWithIntelligence(metadata = {}, input = {}) {
+  const detected = detectMetadataIntelligence({ ...input, ...metadata });
+  const quality = isMissingMetadataValue(metadata.videoQuality || metadata.quality)
+    ? "HD"
+    : (metadata.videoQuality || metadata.quality);
+
+  return {
+    ...metadata,
+    category: isMissingMetadataValue(metadata.category) ? detected.category : metadata.category,
+    genre: isMissingMetadataValue(metadata.genre) ? detected.genre : metadata.genre,
+    country: isMissingMetadataValue(metadata.country) ? detected.country : metadata.country,
+    language: isMissingMetadataValue(metadata.language) ? detected.language : metadata.language,
+    videoQuality: quality,
+    quality,
+    contentType: metadata.contentType || detected.contentType,
+    metadataRule: metadata.metadataRule || detected.metadataRule,
+    metadataConfidence: metadata.metadataConfidence || detected.metadataConfidence,
+    metadataStatus: metadata.metadataStatus || detected.metadataStatus,
+    tags: Array.isArray(metadata.tags) && metadata.tags.length
+      ? metadata.tags
+      : [detected.contentType, detected.genre, detected.country, quality].filter(Boolean)
+  };
+}
