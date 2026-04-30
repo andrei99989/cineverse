@@ -2110,7 +2110,39 @@ function HomePage({ selectedMovie, setPage, movies, uploads, apiStatus, watchHis
   }, []);
 
   const homeUploadTotal = Number(homeCatalogStats?.total || 0) || uploads.length;
-  const aiRecommendations = buildAiRecommendations(uploads)
+
+  const [homeCatalogUploads, setHomeCatalogUploads] = useState([]);
+  const [homeCatalogRecommendationError, setHomeCatalogRecommendationError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadHomeCatalogUploads() {
+      try {
+        setHomeCatalogRecommendationError("");
+        const data = await apiCatalog({
+          page: 1,
+          limit: 100,
+          sort: "newest"
+        });
+
+        if (!alive) return;
+
+        setHomeCatalogUploads(Array.isArray(data?.items) ? data.items : []);
+      } catch (error) {
+        if (alive) setHomeCatalogRecommendationError(String(error?.message || error));
+      }
+    }
+
+    loadHomeCatalogUploads();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const recommendationUploads = homeCatalogUploads.length ? homeCatalogUploads : uploads;
+  const aiRecommendations = buildAiRecommendations(recommendationUploads)
     .map((item) => {
       const feedback = aiRecommendationFeedback[item.label] || 0;
       return {
@@ -2210,6 +2242,10 @@ function HomePage({ selectedMovie, setPage, movies, uploads, apiStatus, watchHis
       <section className="section">
         <h2><Sparkles size={28} /> AI Recommendations Panel</h2>
         <p>Recomandări inteligente filtrate după francize, colecții, genuri și scor AI relevant.</p>
+        <p className="mutedText">
+          Sursă recomandări: {homeCatalogUploads.length ? `/catalog (${homeCatalogUploads.length} itemuri)` : `uploads local (${uploads.length} itemuri)`}
+          {homeCatalogRecommendationError ? ` · ${homeCatalogRecommendationError}` : ""}
+        </p>
 
         {aiRecommendations.length === 0 ? (
           <p className="empty">Adaugă upload-uri ca să generezi recomandări AI.</p>
