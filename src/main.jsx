@@ -1412,8 +1412,7 @@ function App() {
   const [page, setPage] = useState(() => new URLSearchParams(window.location.search).get("page") || "home");
   const pageKey = normalizeCineVersePageName(page);
   const [movies, setMovies] = useState([]);
-  const [uploads, setUploads] = useState([])
-  const autoReprocessStartedRef = useRef(false);;
+  const [uploads, setUploads] = useState([]);
   const [apiStatus, setApiStatus] = useState("checking");
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [activeVideo, setActiveVideo] = useState(null);
@@ -1471,79 +1470,6 @@ function App() {
     };
   }, []);
 
-  function isWeakAutoMetadataCandidate(item) {
-    const metadata = item?.metadata || {};
-    const category = String(metadata.category || "").toLowerCase();
-    const genre = String(metadata.genre || "").toLowerCase();
-    const country = String(metadata.country || "").toLowerCase();
-    const language = String(metadata.language || "").toLowerCase();
-
-    return Boolean(item?.id) && (
-      !metadata.metadataRule ||
-      metadata.metadataRule === "fallback-default" ||
-      category === "filme" ||
-      category === "movies" ||
-      genre === "general" ||
-      country === "all" ||
-      country === "unknown" ||
-      country === "statele unite" ||
-      language === "all" ||
-      language === "unknown" ||
-      language === "engleză"
-    );
-  }
-
-  async function autoReprocessWeakMetadataOnLoad(items = []) {
-    if (autoReprocessStartedRef.current) return;
-    autoReprocessStartedRef.current = true;
-
-    const targets = items
-      .filter(isWeakAutoMetadataCandidate)
-      .map((item) => {
-        const metadata = item.metadata || {};
-        const nextMetadata = completeMetadataWithIntelligence(metadata, {
-          title: item.title,
-          movieTitle: metadata.movieTitle || item.title,
-          category: metadata.category,
-          genre: metadata.genre,
-          sourceType: item.sourceType || item.source_type,
-          url: item.value || item.url,
-          notes: metadata.notes,
-          description: metadata.description,
-          originalTitle: metadata.originalTitle
-        });
-
-        return { item, metadata, nextMetadata };
-      })
-      .filter(({ metadata, nextMetadata }) =>
-        nextMetadata.metadataRule &&
-        nextMetadata.metadataRule !== "fallback-default" &&
-        nextMetadata.metadataRule !== metadata.metadataRule
-      )
-      .slice(0, 10);
-
-    if (!targets.length) return;
-
-    try {
-      await Promise.all(targets.map(({ item, nextMetadata }) =>
-        apiPut(`/uploads/${item.id}`, {
-          title: item.title || "",
-          inputType: item.inputType || item.input_type || "url",
-          sourceType: item.sourceType || item.source_type || "Other URL",
-          value: item.value || item.url || "",
-          posterUrl: item.posterUrl || item.poster_url || "",
-          metadata: nextMetadata
-        })
-      ));
-
-      window.setTimeout(() => {
-        loadCloudflareData();
-      }, 500);
-    } catch (error) {
-      console.error("Auto AI metadata reprocess failed:", error);
-    }
-  }
-
   async function loadCloudflareData() {
     try {
       const [apiMoviesResult, apiUploadsResult] = await Promise.allSettled([
@@ -1576,8 +1502,6 @@ function App() {
 
       const mappedMovies = movieItems.map(mapMovieFromApi);
       const mappedUploads = uploadItems.map(mapUploadFromApi);
-
-      autoReprocessWeakMetadataOnLoad(mappedUploads);
 
       setMovies(mappedMovies);
       setUploads(mappedUploads);
