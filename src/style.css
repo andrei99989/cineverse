@@ -3018,19 +3018,6 @@ body.cv-high-contrast textarea:focus {
   margin-bottom: 14px;
 }
 
-.adminCompactMode .changelogBox:has(h4) {
-  display: none;
-}
-
-.adminCompactMode .changelogBox:has(h4:contains("Bulk Import Stability Snapshot")) {
-  display: block;
-}
-
-/* Admin Compact Mode v1 */
-.adminCompactHeader {
-  margin-bottom: 14px;
-}
-
 .adminCompactMode .changelogBox {
   max-height: 260px;
   overflow: auto;
