@@ -6454,6 +6454,22 @@ function AdminTokenPanel() {
 
 
 function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage, onEdit, setPage }) {
+  const [adminCompactMode, setAdminCompactMode] = useState(() => {
+    try {
+      return localStorage.getItem("cineverse_admin_compact_mode") !== "off";
+    } catch {
+      return true;
+    }
+  });
+
+  function toggleAdminCompactMode() {
+    const next = !adminCompactMode;
+    setAdminCompactMode(next);
+
+    try {
+      localStorage.setItem("cineverse_admin_compact_mode", next ? "on" : "off");
+    } catch {}
+  }
   const [adminCatalogStats, setAdminCatalogStats] = useState(null);
   const [adminCatalogStatsError, setAdminCatalogStatsError] = useState("");
 
@@ -6805,7 +6821,16 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
 
   return (
     <main>
-      <section className="section admin">
+      <section className={`section admin ${adminCompactMode ? "adminCompactMode" : ""}`}>
+        <div className="sectionHeader adminCompactHeader">
+          <div>
+            <h2>Admin Center</h2>
+            <p>Audit, bulk fix, token, Algolia și diagnostic platformă.</p>
+          </div>
+          <button type="button" className="secondary" onClick={toggleAdminCompactMode}>
+            Compact Mode: {adminCompactMode ? "ON" : "OFF"}
+          </button>
+        </div>
         <AdminMetadataSearch />
         <AdminMetadataAuditPanel uploads={uploads} onEdit={onEdit} onGoToLibrary={() => setPage?.("library")} />
 

@@ -3012,3 +3012,42 @@ body.cv-high-contrast textarea:focus {
 .admin .quickActions button {
   margin: 0;
 }
+
+/* Admin Compact Mode v1 */
+.adminCompactHeader {
+  margin-bottom: 14px;
+}
+
+.adminCompactMode .changelogBox:has(h4) {
+  display: none;
+}
+
+.adminCompactMode .changelogBox:has(h4:contains("Bulk Import Stability Snapshot")) {
+  display: block;
+}
+
+/* Admin Compact Mode v1 */
+.adminCompactHeader {
+  margin-bottom: 14px;
+}
+
+.adminCompactMode .changelogBox {
+  max-height: 260px;
+  overflow: auto;
+}
+
+.adminCompactMode .changelogBox ul {
+  max-height: 180px;
+  overflow: auto;
+}
+
+.adminCompactMode .details {
+  gap: 14px;
+}
+
+.adminCompactMode .adminMetadataAuditPanel .auditList,
+.adminCompactMode .bulkAuditActionList {
+  max-height: 520px;
+  overflow: auto;
+  padding-right: 4px;
+}
