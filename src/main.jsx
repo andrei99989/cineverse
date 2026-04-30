@@ -6259,13 +6259,16 @@ function AdminMetadataAuditPanel({ uploads = [], onEdit, onGoToLibrary }) {
                 <p>{meta.sourceType} · scor metadata {score}%</p>
 
                 <div className="metadataBadgeRow">
-                  {meta.category && <span>{meta.category}</span>}
-                  {meta.genre && <span>{meta.genre}</span>}
-                  {meta.year && <span>{meta.year}</span>}
-                  {meta.country && <span>{meta.country}</span>}
-                  {meta.language && <span>{meta.language}</span>}
-                  {meta.quality && <span>{meta.quality}</span>}
-                  {meta.tags.slice(0, 4).map((tag) => <span key={tag}>#{tag}</span>)}
+                  {!isAuditMetaMissing(meta.category) && <span>{meta.category}</span>}
+                  {!isAuditMetaMissing(meta.genre) && <span>{meta.genre}</span>}
+                  {!isAuditMetaMissing(meta.year) && <span>{meta.year}</span>}
+                  {!isAuditMetaMissing(meta.country) && <span>{meta.country}</span>}
+                  {!isAuditMetaMissing(meta.language) && <span>{meta.language}</span>}
+                  {!isAuditMetaMissing(meta.quality) && <span>{meta.quality}</span>}
+                  {meta.tags
+                    .filter((tag) => !isAuditMetaMissing(tag))
+                    .slice(0, 4)
+                    .map((tag) => <span key={tag}>#{tag}</span>)}
                 </div>
 
                 {missing.length ? (
