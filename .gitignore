@@ -18,3 +18,23 @@ android/local.properties
 # Backup zip-uri
 *.zip
 .local-backups/
+
+# Secrets / local Android files
+android/local.properties
+android/keystore/
+*.jks
+*.keystore
+
+# Archives / backups
+*.zip
+.local-backups/
+src/*.before-*
+src/*.backup.*
+src/*.ok-*
+*.before-*
+
+# Build outputs
+dist/
+node_modules/
+android/.gradle/
+android/**/build/
