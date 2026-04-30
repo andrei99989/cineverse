@@ -175,18 +175,26 @@ export function completeMetadataWithIntelligence(metadata = {}, input = {}) {
     ? "HD"
     : (metadata.videoQuality || metadata.quality);
 
+  const isFallbackRule = !metadata.metadataRule || metadata.metadataRule === "fallback-default";
+  const strongDetection = detected.metadataRule !== "fallback-default" && Number(detected.metadataConfidence || 0) >= 0.75;
+
+  const weakCategory = isMissingMetadataValue(metadata.category) || (isFallbackRule && ["filme", "movies"].includes(String(metadata.category || "").toLowerCase()) && strongDetection);
+  const weakGenre = isMissingMetadataValue(metadata.genre) || (isFallbackRule && ["general"].includes(String(metadata.genre || "").toLowerCase()) && strongDetection);
+  const weakCountry = isMissingMetadataValue(metadata.country) || (isFallbackRule && ["statele unite", "usa", "united states"].includes(String(metadata.country || "").toLowerCase()) && strongDetection);
+  const weakLanguage = isMissingMetadataValue(metadata.language) || (isFallbackRule && ["engleză", "engleza", "english"].includes(String(metadata.language || "").toLowerCase()) && strongDetection);
+
   return {
     ...metadata,
-    category: isMissingMetadataValue(metadata.category) ? detected.category : metadata.category,
-    genre: isMissingMetadataValue(metadata.genre) ? detected.genre : metadata.genre,
-    country: isMissingMetadataValue(metadata.country) ? detected.country : metadata.country,
-    language: isMissingMetadataValue(metadata.language) ? detected.language : metadata.language,
+    category: weakCategory ? detected.category : metadata.category,
+    genre: weakGenre ? detected.genre : metadata.genre,
+    country: weakCountry ? detected.country : metadata.country,
+    language: weakLanguage ? detected.language : metadata.language,
     videoQuality: quality,
     quality,
-    contentType: metadata.contentType || detected.contentType,
-    metadataRule: metadata.metadataRule || detected.metadataRule,
-    metadataConfidence: metadata.metadataConfidence || detected.metadataConfidence,
-    metadataStatus: metadata.metadataStatus || detected.metadataStatus,
+    contentType: strongDetection ? detected.contentType : (metadata.contentType || detected.contentType),
+    metadataRule: strongDetection ? detected.metadataRule : (metadata.metadataRule || detected.metadataRule),
+    metadataConfidence: strongDetection ? detected.metadataConfidence : (metadata.metadataConfidence || detected.metadataConfidence),
+    metadataStatus: strongDetection ? detected.metadataStatus : (metadata.metadataStatus || detected.metadataStatus),
     tags: Array.isArray(metadata.tags) && metadata.tags.length
       ? metadata.tags
       : [detected.contentType, detected.genre, detected.country, quality].filter(Boolean)
