@@ -1905,7 +1905,7 @@ function CloudStatus({ apiStatus, reload }) {
       <div>
         <Cloud size={18} />
         <span>Cloudflare API: {apiStatus === "connected" ? "conectat" : apiStatus}</span>
-        <small>{API_URL}</small>
+        <small> · {API_URL}</small>
       </div>
       <button className="secondary" onClick={reload}>Reîncarcă date</button>
     </div>
