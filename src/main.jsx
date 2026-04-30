@@ -6263,6 +6263,95 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
     }, 900);
   };
 
+  const isWeakReprocessCandidate = (metadata = {}) => {
+    const category = String(metadata.category || "").toLowerCase();
+    const genre = String(metadata.genre || "").toLowerCase();
+    const country = String(metadata.country || "").toLowerCase();
+    const language = String(metadata.language || "").toLowerCase();
+
+    return (
+      !metadata.metadataRule ||
+      metadata.metadataRule === "fallback-default" ||
+      category === "filme" ||
+      category === "movies" ||
+      genre === "general" ||
+      country === "statele unite" ||
+      country === "unknown" ||
+      language === "engleză" ||
+      language === "unknown"
+    );
+  };
+
+  const handleReprocessOldAiMetadata = async () => {
+    const targets = (uploads || [])
+      .filter((item) => item?.id)
+      .filter((item) => isWeakReprocessCandidate(item.metadata || {}))
+      .slice(0, 50);
+
+    if (!targets.length) {
+      setBulkAuditActionMessage("Nu există upload-uri vechi potrivite pentru re-procesare AI.");
+      return;
+    }
+
+    setBulkAuditActionMessage("Reprocesez AI metadata pentru " + targets.length + " upload-uri vechi...");
+
+    let updated = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    for (const item of targets) {
+      try {
+        const metadata = item.metadata || {};
+        const nextMetadata = completeMetadataWithIntelligence(metadata, {
+          title: item.title,
+          movieTitle: metadata.movieTitle || item.title,
+          category: metadata.category,
+          genre: metadata.genre,
+          sourceType: item.sourceType || item.source_type,
+          url: item.value || item.url,
+          notes: metadata.notes,
+          description: metadata.description,
+          originalTitle: metadata.originalTitle
+        });
+
+        if (!nextMetadata.metadataRule || nextMetadata.metadataRule === "fallback-default") {
+          skipped += 1;
+          continue;
+        }
+
+        if (nextMetadata.metadataRule === metadata.metadataRule) {
+          skipped += 1;
+          continue;
+        }
+
+        await apiPut(`/uploads/${item.id}`, {
+          title: item.title || "",
+          inputType: item.inputType || item.input_type || "url",
+          sourceType: item.sourceType || item.source_type || "Other URL",
+          value: item.value || item.url || "",
+          posterUrl: item.posterUrl || item.poster_url || "",
+          metadata: nextMetadata
+        });
+
+        updated += 1;
+      } catch (error) {
+        console.error(error);
+        failed += 1;
+      }
+    }
+
+    setBulkAuditActionMessage(
+      "AI reprocess finalizat: " +
+      updated + " actualizate, " +
+      skipped + " ignorate, " +
+      failed + " eșuate. Reîncarc datele..."
+    );
+
+    window.setTimeout(() => {
+      window.location.reload();
+    }, 900);
+  };
+
   return (
     <main>
       <section className="section admin">
@@ -6303,6 +6392,9 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
               <div className="quickActions">
                 <button type="button" className="secondary" onClick={handleFixBulkMissingMetadata}>
                   Completează Bulk lipsuri
+                </button>
+                <button type="button" className="secondary" onClick={handleReprocessOldAiMetadata}>
+                  Reprocesează AI metadata vechi
                 </button>
               </div>
               {bulkAuditActionMessage && <p className="mutedText">{bulkAuditActionMessage}</p>}
