@@ -6428,7 +6428,44 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
   const adminUploadTotal = adminD1Total || uploads.length;
   const adminStatsMode = adminD1Total ? "D1 server-side" : "local fallback";
 
-  const bulkQualityAuditItems = (uploads || []).filter((item) => {
+  const [bulkCatalogAuditItems, setBulkCatalogAuditItems] = useState([]);
+  const [bulkCatalogAuditError, setBulkCatalogAuditError] = useState("");
+  const [bulkCatalogAuditLoading, setBulkCatalogAuditLoading] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadBulkCatalogAuditItems() {
+      try {
+        setBulkCatalogAuditLoading(true);
+        setBulkCatalogAuditError("");
+
+        const data = await apiCatalog({
+          page: 1,
+          limit: 100,
+          sort: "newest"
+        });
+
+        if (!alive) return;
+
+        setBulkCatalogAuditItems(Array.isArray(data?.items) ? data.items : []);
+      } catch (error) {
+        if (alive) setBulkCatalogAuditError(String(error?.message || error));
+      } finally {
+        if (alive) setBulkCatalogAuditLoading(false);
+      }
+    }
+
+    loadBulkCatalogAuditItems();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const bulkAuditSourceItems = bulkCatalogAuditItems.length ? bulkCatalogAuditItems : uploads;
+
+  const bulkQualityAuditItems = (bulkAuditSourceItems || []).filter((item) => {
     const title = String(item?.title || "").toLowerCase();
     return title.startsWith("bulk youtube") ||
       title.startsWith("bulk tiktok") ||
@@ -6692,8 +6729,13 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
             </div>
 
             <div className="changelogBox">
-              <h4>Bulk Import Quality Audit</h4>
+              <h4>Bulk Import Quality Audit v2</h4>
               <p>Itemuri Bulk rămase cu titlu temporar. Nu se șterge nimic automat.</p>
+              <p className="mutedText">
+                Sursă audit: {bulkCatalogAuditItems.length ? `/catalog (${bulkCatalogAuditItems.length} itemuri)` : `uploads local (${uploads.length} itemuri)`}
+                {bulkCatalogAuditLoading ? " · se încarcă..." : ""}
+                {bulkCatalogAuditError ? ` · ${bulkCatalogAuditError}` : ""}
+              </p>
               <ul>
                 <li>Total Bulk temporare: {bulkQualityAuditItems.length}</li>
                 <li>Afișate: {bulkQualityAuditPreview.length}</li>
