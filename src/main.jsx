@@ -6453,6 +6453,96 @@ function AdminTokenPanel() {
 }
 
 
+function AdminAutoMetadataQueuePanel({ catalogItems = [], onEdit }) {
+  const [queueLimit, setQueueLimit] = useState(12);
+
+  const candidates = useMemo(() => {
+    return (catalogItems || [])
+      .filter((item) => {
+        const title = String(item?.title || "").trim();
+        const lowerTitle = title.toLowerCase();
+        const metadata = item?.metadata || {};
+
+        if (!title) return false;
+        if (lowerTitle.startsWith("bulk youtube")) return false;
+        if (lowerTitle.startsWith("bulk tiktok")) return false;
+        if (lowerTitle.startsWith("bulk rumble")) return false;
+        if (lowerTitle.startsWith("bulk url")) return false;
+
+        const missingPoster = !item.posterUrl;
+        const missingGenre = !isRealMetaValue(metadata.genre);
+        const missingYear = !isRealMetaValue(metadata.year);
+
+        return missingPoster || missingGenre || missingYear;
+      })
+      .map((item) => {
+        const metadata = item.metadata || {};
+        const missing = [];
+
+        if (!item.posterUrl) missing.push("poster");
+        if (!isRealMetaValue(metadata.genre)) missing.push("gen");
+        if (!isRealMetaValue(metadata.year)) missing.push("an");
+        if (!isRealMetaValue(metadata.country)) missing.push("țară");
+        if (!isRealMetaValue(metadata.language)) missing.push("limbă");
+        if (!isRealMetaValue(metadata.videoQuality || metadata.quality)) missing.push("calitate");
+
+        const confidence = Math.max(10, 100 - missing.length * 12);
+
+        return {
+          item,
+          metadata,
+          missing,
+          confidence
+        };
+      })
+      .sort((a, b) => b.missing.length - a.missing.length || a.item.title.localeCompare(b.item.title));
+  }, [catalogItems]);
+
+  const visibleCandidates = candidates.slice(0, queueLimit);
+
+  return (
+    <div className="changelogBox">
+      <div className="sectionHeader">
+        <div>
+          <h4>Auto Metadata Queue v1</h4>
+          <p>Candidate sigure pentru completare poster, gen și an. Bulk-urile sunt excluse.</p>
+        </div>
+        <span className="pill">{candidates.length} candidate</span>
+      </div>
+
+      {candidates.length === 0 ? (
+        <p className="empty">Nu există candidate clare pentru metadata automată.</p>
+      ) : (
+        <>
+          <div className="quickActions">
+            <button type="button" className="secondary" onClick={() => setQueueLimit((n) => Math.min(n + 12, candidates.length))}>
+              Arată mai multe
+            </button>
+            <button type="button" className="secondary" onClick={() => setQueueLimit(12)}>
+              Restrânge
+            </button>
+          </div>
+
+          <div className="bulkAuditActionList">
+            {visibleCandidates.map(({ item, missing, confidence }) => (
+              <div className="bulkAuditActionItem" key={item.id || item.title}>
+                <strong>{item.title || "Fără titlu"}</strong>
+                <div>{item.sourceType || item.source_type || "sursă necunoscută"} · scor candidat {confidence}%</div>
+                <div className="metadataBadgeRow">
+                  {missing.map((field) => <span key={field}>Lipsește: {field}</span>)}
+                </div>
+                <button type="button" onClick={() => onEdit?.(item)}>
+                  Edit metadata
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgolia, lastAlgoliaSync, adminAlgoliaMessage, setAdminAlgoliaMessage, onEdit, setPage }) {
   const [adminCompactMode, setAdminCompactMode] = useState(() => {
     try {
@@ -6907,6 +6997,8 @@ function AdminPage({ movies, uploads, addMovie, deleteMovie, syncUploadsToAlgoli
                 <p>Nu există itemuri Bulk temporare în audit.</p>
               )}
             </div>
+
+            <AdminAutoMetadataQueuePanel catalogItems={bulkAuditSourceItems} onEdit={onEdit} />
 
             <span className="pill">Packages</span>
             <h3>Package Version Manager</h3>
