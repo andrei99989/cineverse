@@ -2090,6 +2090,26 @@ function buildAiRecommendations(uploads = []) {
 }
 
 function HomePage({ selectedMovie, setPage, movies, uploads, apiStatus, watchHistory = [], resetWatchHistory, onPlay, onSearchRecommendation, lastAiRecommendation, aiRecommendationFeedback = {}, onRateAiRecommendation, onResetAiRecommendationFeedback }) {
+  const [homeCatalogStats, setHomeCatalogStats] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadHomeCatalogStats() {
+      try {
+        const data = await apiCatalogStats();
+        if (alive && data?.ok) setHomeCatalogStats(data);
+      } catch {}
+    }
+
+    loadHomeCatalogStats();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const homeUploadTotal = Number(homeCatalogStats?.total || 0) || uploads.length;
   const aiRecommendations = buildAiRecommendations(uploads)
     .map((item) => {
       const feedback = aiRecommendationFeedback[item.label] || 0;
@@ -2121,7 +2141,7 @@ function HomePage({ selectedMovie, setPage, movies, uploads, apiStatus, watchHis
           <div>
             <h2>Status platformă</h2>
             <p>Filme: {movies.length}</p>
-            <p>Upload-uri: {uploads.length}</p>
+            <p>Upload-uri: {homeUploadTotal}</p>
             <p>API: {apiStatus}</p>
           </div>
         </div>
