@@ -47,6 +47,7 @@ import SettingsPage from "./SettingsPage.jsx";
 import PlaybackPreferences from "./PlaybackPreferences.jsx";
 import SettingsCenter from "./SettingsCenter.jsx";
 import FilterWizard from "./FilterWizard.jsx";
+import { completeMetadataWithIntelligence } from "./metadataIntelligence.js";
 
 
 const CINEVERSE_SETTINGS_KEY = "cineverse_settings_v1";
@@ -1637,10 +1638,18 @@ function App() {
       sourceType,
       value,
       posterUrl,
-        metadata: {
+        metadata: completeMetadataWithIntelligence({
           ...aiMetadata,
           ...manualMetadata
-        }
+        }, {
+          title,
+          movieTitle: form.get("movieTitle"),
+          category: form.get("category"),
+          genre: form.get("genre"),
+          sourceType,
+          url: value,
+          notes
+        })
     };
 
     const duplicates = findDuplicateUploads(uploads, payload);
