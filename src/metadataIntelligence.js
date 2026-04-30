@@ -1,5 +1,76 @@
 const COUNTRY_LANGUAGE_RULES = [
   {
+    id: "marvel-usa-superhero",
+    terms: ["marvel", "avengers", "răzbunătorii", "hulk", "x-men", "spider-man", "iron man", "captain america", "thor", "black panther"],
+    category: "Filme",
+    genre: "Superhero",
+    country: "Statele Unite",
+    language: "Engleză",
+    contentType: "movie",
+    confidence: 0.88
+  },
+  {
+    id: "jumanji-usa-adventure",
+    terms: ["jumanji"],
+    category: "Filme",
+    genre: "Aventură",
+    country: "Statele Unite",
+    language: "Engleză",
+    contentType: "movie",
+    confidence: 0.86
+  },
+  {
+    id: "power-rangers-usa-superhero",
+    terms: ["power rangers", "mighty morphin"],
+    category: "Filme",
+    genre: "Superhero",
+    country: "Statele Unite",
+    language: "Engleză",
+    contentType: "movie",
+    confidence: 0.84
+  },
+  {
+    id: "robin-hood-uk-adventure",
+    terms: ["robin hood", "nottingham", "sherwood"],
+    category: "Filme",
+    genre: "Aventură",
+    country: "Regatul Unit",
+    language: "Engleză",
+    contentType: "movie",
+    confidence: 0.82
+  },
+  {
+    id: "middle-earth-nz-fantasy",
+    terms: ["hobbit", "hobbitul", "lord of the rings", "stăpânul inelelor", "middle-earth"],
+    category: "Filme",
+    genre: "Fantasy",
+    country: "Noua Zeelandă",
+    language: "Engleză",
+    contentType: "movie",
+    confidence: 0.82
+  },
+  {
+    id: "avatar-usa-scifi",
+    terms: ["avatar", "pandora", "na'vi", "na’vi", "james cameron"],
+    category: "Filme",
+    genre: "Sci-Fi",
+    country: "Statele Unite",
+    language: "Engleză",
+    contentType: "movie",
+    confidence: 0.86
+  },
+  {
+    id: "zorro-latin-adventure",
+    terms: ["zorro", "don diego", "california spanish", "spanish california"],
+    category: "Filme",
+    genre: "Aventură",
+    country: "Mexic",
+    language: "Spaniolă",
+    contentType: "movie",
+    confidence: 0.76
+  },
+
+  {
     id: "latin-music-mexico",
     terms: ["corridos", "banda", "norteño", "regional mexicano", "peso pluma", "natanael cano", "grupo firme", "musica mexicana", "música mexicana"],
     category: "Muzică",
