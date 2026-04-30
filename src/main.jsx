@@ -1576,15 +1576,42 @@ function App() {
       return v;
     };
 
+
+    const uploadSmartText = [
+      title,
+      form.get("movieTitle"),
+      form.get("category"),
+      form.get("genre"),
+      notes
+    ].join(" ").toLowerCase();
+
+    const looksAnimeUpload = [
+      "anime",
+      "dragon ball",
+      "naruto",
+      "one piece",
+      "demon slayer",
+      "jujutsu",
+      "pokemon",
+      "pokémon",
+      "bleach",
+      "attack on titan",
+      "sailor moon"
+    ].some((term) => uploadSmartText.includes(term));
+
+    const uploadDefaultCategory = looksAnimeUpload ? "Anime-uri Filme" : "Filme";
+    const uploadDefaultGenre = looksAnimeUpload ? "Anime" : "General";
+    const uploadDefaultCountry = looksAnimeUpload ? "Japonia" : "Statele Unite";
+    const uploadDefaultLanguage = looksAnimeUpload ? "Japoneză" : "Engleză";
     const uploadVideoQuality = normalizeUploadMetaValue(form.get("videoQuality"), "HD");
 
     const manualMetadata = {
       movieTitle: form.get("movieTitle"),
-      category: normalizeUploadMetaValue(form.get("category"), "Filme"),
-      genre: normalizeUploadMetaValue(form.get("genre"), "General"),
+      category: normalizeUploadMetaValue(form.get("category"), uploadDefaultCategory),
+      genre: normalizeUploadMetaValue(form.get("genre"), uploadDefaultGenre),
       year: form.get("year") || "",
-      country: normalizeUploadMetaValue(form.get("country"), "Statele Unite"),
-      language: normalizeUploadMetaValue(form.get("language"), "Engleză"),
+      country: normalizeUploadMetaValue(form.get("country"), uploadDefaultCountry),
+      language: normalizeUploadMetaValue(form.get("language"), uploadDefaultLanguage),
       videoQuality: uploadVideoQuality,
       quality: uploadVideoQuality,
       subtitleLanguage: form.get("subtitleLanguage") || "",
