@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { apiDelete, apiGet, apiPost, apiPut } from "./api";
+import { completeMetadataWithIntelligence } from "./metadataIntelligence.js";
 
 function waitBulkImport(ms = 80) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -668,25 +669,31 @@ export default function BulkImportPanel({ onDataChanged, onSendToMetadataSearch,
               source_type: item.sourceType,
               value: item.value,
               poster_url: "",
-              metadata: {
+              metadata: completeMetadataWithIntelligence({
                 movieTitle: item.title,
-                category: item.metadata.category || "Filme",
-                genre: item.metadata.genre || "General",
-                country: item.metadata.country && item.metadata.country !== "All" ? item.metadata.country : "Statele Unite",
-                language: item.metadata.language && item.metadata.language !== "All" ? item.metadata.language : "Engleză",
+                category: item.metadata.category || "",
+                genre: item.metadata.genre || "",
+                country: item.metadata.country || "",
+                language: item.metadata.language || "",
                 videoQuality: item.metadata.videoQuality || item.metadata.quality || "HD",
                 quality: item.metadata.videoQuality || item.metadata.quality || "HD",
                 notes: smartBulkNotes(item),
                 tags: Array.isArray(item.metadata.tags) && item.metadata.tags.length
                   ? item.metadata.tags
-                  : ["Bulk", item.sourceType || "YouTube", item.metadata.videoQuality || item.metadata.quality || "HD"],
+                  : [],
                 sourceType: item.sourceType,
                 inputType: item.inputType,
                 bulkImport: true,
                 aiMetadata: item.metadata.aiMetadataEnabled,
                 needsAiMetadata: item.metadata.aiMetadataEnabled,
                 aiMetadataAutoCompleted: true
-              }
+              }, {
+                title: item.title,
+                movieTitle: item.title,
+                sourceType: item.sourceType,
+                url: item.value,
+                notes: smartBulkNotes(item)
+              })
             };
 
             const response = await apiPost("/uploads", payload);
