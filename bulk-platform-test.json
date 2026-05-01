@@ -1,0 +1,95 @@
+{
+  "items": [
+    {
+      "title": "Bulk YouTube tBDouvkjSHM",
+      "inputType": "url",
+      "sourceType": "YouTube",
+      "value": "https://youtu.be/tBDouvkjSHM?is=6VnKTRAaePJeL_Bv",
+      "posterUrl": "",
+      "metadata": {
+        "category": "Filme",
+        "genre": "General",
+        "country": "Statele Unite",
+        "language": "Engleză",
+        "videoQuality": "HD",
+        "tags": ["bulk-import", "youtube"]
+      }
+    },
+    {
+      "title": "Bulk Terabox 1-yLlfKU-bpszUNNkjm45uw",
+      "inputType": "url",
+      "sourceType": "Terabox",
+      "value": "https://1024terabox.com/s/1-yLlfKU-bpszUNNkjm45uw",
+      "posterUrl": "",
+      "metadata": {
+        "category": "Filme",
+        "genre": "General",
+        "country": "Statele Unite",
+        "language": "Engleză",
+        "videoQuality": "HD",
+        "tags": ["bulk-import", "terabox"]
+      }
+    },
+    {
+      "title": "Bulk Rumble v2o2oe5-synthwave-radio-beats-to-chillgame-to",
+      "inputType": "url",
+      "sourceType": "Rumble",
+      "value": "https://rumble.com/v2o2oe5-synthwave-radio-beats-to-chillgame-to.html",
+      "posterUrl": "",
+      "metadata": {
+        "category": "Filme",
+        "genre": "General",
+        "country": "Statele Unite",
+        "language": "Engleză",
+        "videoQuality": "HD",
+        "tags": ["bulk-import", "rumble"]
+      }
+    },
+    {
+      "title": "Bulk Dailymotion xa7p9z6",
+      "inputType": "url",
+      "sourceType": "Dailymotion",
+      "value": "https://www.dailymotion.com/video/xa7p9z6",
+      "posterUrl": "",
+      "metadata": {
+        "category": "Filme",
+        "genre": "General",
+        "country": "Statele Unite",
+        "language": "Engleză",
+        "videoQuality": "HD",
+        "tags": ["bulk-import", "dailymotion"]
+      }
+    },
+    {
+      "title": "Bulk Vimeo 1179500818",
+      "inputType": "url",
+      "sourceType": "Vimeo",
+      "value": "https://vimeo.com/1179500818?fl=pl&fe=sh",
+      "posterUrl": "",
+      "metadata": {
+        "category": "Filme",
+        "genre": "General",
+        "country": "Statele Unite",
+        "language": "Engleză",
+        "videoQuality": "HD",
+        "tags": ["bulk-import", "vimeo"]
+      }
+    },
+    {
+      "title": "Bulk TikTok ZNRgpBFHy",
+      "inputType": "url",
+      "sourceType": "TikTok",
+      "value": "https://vm.tiktok.com/ZNRgpBFHy/",
+      "posterUrl": "",
+      "metadata": {
+        "category": "Filme",
+        "genre": "General",
+        "country": "Statele Unite",
+        "language": "Engleză",
+        "videoQuality": "HD",
+        "tags": ["bulk-import", "tiktok"]
+      }
+    }
+  ],
+  "syncAlgolia": true
+}
