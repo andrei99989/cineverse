@@ -665,10 +665,16 @@ export default function BulkImportPanel({ onDataChanged, onSendToMetadataSearch,
           try {
             const payload = {
               title: item.title,
-              input_type: item.inputType,
-              source_type: item.sourceType,
+
+              inputType: item.inputType || item.input_type || "url",
+              sourceType: item.sourceType || item.source_type || "Other URL",
+              posterUrl: item.posterUrl || item.poster_url || "",
+
+              input_type: item.input_type || item.inputType || "url",
+              source_type: item.source_type || item.sourceType || "Other URL",
+              poster_url: item.poster_url || item.posterUrl || "",
+
               value: item.value,
-              poster_url: "",
               metadata: completeMetadataWithIntelligence({
                 movieTitle: item.title,
                 category: item.metadata.category || "",
@@ -681,8 +687,8 @@ export default function BulkImportPanel({ onDataChanged, onSendToMetadataSearch,
                 tags: Array.isArray(item.metadata.tags) && item.metadata.tags.length
                   ? item.metadata.tags
                   : [],
-                sourceType: item.sourceType,
-                inputType: item.inputType,
+                sourceType: item.sourceType || item.source_type || "Other URL",
+                inputType: item.inputType || item.input_type || "url",
                 bulkImport: true,
                 aiMetadata: item.metadata.aiMetadataEnabled,
                 needsAiMetadata: item.metadata.aiMetadataEnabled,
@@ -690,7 +696,7 @@ export default function BulkImportPanel({ onDataChanged, onSendToMetadataSearch,
               }, {
                 title: item.title,
                 movieTitle: item.title,
-                sourceType: item.sourceType,
+                sourceType: item.sourceType || item.source_type || "Other URL",
                 url: item.value,
                 notes: smartBulkNotes(item)
               })

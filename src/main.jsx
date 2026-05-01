@@ -444,6 +444,8 @@ function detectSourceType(url) {
   if (value.includes("youtube.com") || value.includes("youtu.be")) return "YouTube";
   if (value.includes("tiktok.com")) return "TikTok";
   if (value.includes("rumble.com")) return "Rumble";
+  if (value.includes("vimeo.com")) return "Vimeo";
+  if (value.includes("dailymotion.com") || value.includes("dai.ly")) return "Dailymotion";
   if (value.includes("terabox.com") || value.includes("1024tera.com") || value.includes("teraboxapp.com")) return "Terabox";
   if (value.includes("google.com") || value.includes("drive.google.com")) return "Google / Website";
 
@@ -506,6 +508,9 @@ function isAllowedIframeSrc(src) {
       host.includes("youtube-nocookie.com") ||
       host.includes("tiktok.com") ||
       host.includes("rumble.com") ||
+      host.includes("vimeo.com") ||
+      host.includes("dailymotion.com") ||
+      host.includes("dai.ly") ||
       host.includes("terabox.com") ||
       host.includes("1024tera.com") ||
       host.includes("google.com") ||
@@ -1679,7 +1684,7 @@ function App() {
       if (!ok) return;
     }
 
-    await apiPost("/uploads", payload);
+    await apiPost("/uploads/bulk", { items: [payload] });
     await loadCloudflareData();
     event.currentTarget.reset();
   }

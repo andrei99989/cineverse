@@ -38,3 +38,9 @@ dist/
 node_modules/
 android/.gradle/
 android/**/build/
+
+# local backups / Termux fix scripts
+*.bak-*
+android/*.bak-*
+android/fix-*.sh
+android/fix-*.py
